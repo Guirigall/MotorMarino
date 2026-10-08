@@ -1,0 +1,1655 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sala de Máquinas 3YM20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: shell de exposición — topbar · índice de escenas · escenario 3D · inspector. El color sólo significa sistema. */
+:root{
+  --bg:#F5F6F8; --bg-subtle:#EEF1F5; --surface:#FFFFFF; --surface-hover:#F3F5F8;
+  --border:#DDE2E9; --border-strong:#C8D0DC;
+  --text:#161B24; --text-muted:#5E6878; --text-faint:#8C96A6; --focus:#2563EB;
+  --glass:rgba(255,255,255,.80); --glass-border:rgba(190,200,214,.75);
+  --stage:#E7EDF4;
+  --c-fuel:#B86E00; --c-dc:#0B7FC0; --c-ac:#9B3FC4; --c-sea:#0A7F6E; --c-fresh:#4FAF9C; --c-exh:#D2432A; --c-mech:#4A5565;
+  --font-ui:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-cond:"IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r-control:8px; --r-card:14px;
+  --d-fast:140ms; --d-base:220ms; --ease:cubic-bezier(.2,.8,.2,1);
+  --shadow-float:0 16px 48px rgba(16,24,40,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#07111F; --bg-subtle:#0A1626; --surface:#0E1B2D; --surface-hover:#13243A;
+    --border:#1E3350; --border-strong:#3A5B7D;
+    --text:#F2F7FB; --text-muted:#A9BBCC; --text-faint:#74899D; --focus:#60A5FA;
+    --glass:rgba(9,20,35,.74); --glass-border:rgba(70,104,140,.45);
+    --stage:#07111F;
+    --c-fuel:#F5A524; --c-dc:#4FC3F7; --c-ac:#D98BFF; --c-sea:#2ED3B7; --c-fresh:#B6F5E8; --c-exh:#FF6B4A; --c-mech:#E8EDF3;
+    --shadow-float:0 16px 48px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#07111F; --bg-subtle:#0A1626; --surface:#0E1B2D; --surface-hover:#13243A;
+  --border:#1E3350; --border-strong:#3A5B7D;
+  --text:#F2F7FB; --text-muted:#A9BBCC; --text-faint:#74899D; --focus:#60A5FA;
+  --glass:rgba(9,20,35,.74); --glass-border:rgba(70,104,140,.45);
+  --stage:#07111F;
+  --c-fuel:#F5A524; --c-dc:#4FC3F7; --c-ac:#D98BFF; --c-sea:#2ED3B7; --c-fresh:#B6F5E8; --c-exh:#FF6B4A; --c-mech:#E8EDF3;
+  --shadow-float:0 16px 48px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:400 14px/1.5 var(--font-ui);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.app{height:100%;display:grid;grid-template-columns:232px minmax(0,1fr) 368px;grid-template-rows:56px minmax(0,1fr) auto;
+  grid-template-areas:"top top top" "rail stage insp" "rail bar insp"}
+
+/* Topbar */
+.topbar{grid-area:top;display:flex;align-items:center;gap:16px;padding-inline:16px;border-bottom:1px solid var(--border);background:var(--surface);min-width:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.brand svg{flex:none;color:var(--text)}
+.brand strong{font:600 16px/1.1 var(--font-cond);letter-spacing:.01em;display:block}
+.brand span{font-size:12px;color:var(--text-muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actions{display:flex;gap:8px;flex:none}
+.btn{display:inline-flex;align-items:center;gap:8px;height:36px;padding-inline:14px;border-radius:var(--r-control);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-weight:500;font-size:13px;transition:background var(--d-fast),border-color var(--d-fast)}
+.btn:hover{background:var(--surface-hover);border-color:var(--border-strong)}
+.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn.primary:hover{opacity:.9;background:var(--text)}
+.btn svg{width:16px;height:16px;flex:none}
+
+/* Rail de escenas (secuencia real → numerada) */
+.rail{grid-area:rail;border-right:1px solid var(--border);background:var(--surface);overflow-y:auto;padding-block:12px;padding-inline:10px;display:flex;flex-direction:column;gap:2px}
+.rail h2{font:500 11px/1 var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);padding:8px 10px 10px}
+.sc{position:relative;display:grid;grid-template-columns:28px 1fr;gap:2px 8px;text-align:left;padding:9px 10px;border:0;border-radius:10px;background:transparent;cursor:pointer;transition:background var(--d-fast)}
+.sc:hover{background:var(--surface-hover)}
+.sc .n{grid-row:span 2;font:500 12px/20px var(--font-mono);color:var(--text-faint)}
+.sc .t{font-weight:500;font-size:13.5px;line-height:20px}
+.sc .s{font-size:12px;color:var(--text-muted);line-height:1.35}
+.sc .p{position:absolute;left:10px;right:10px;bottom:3px;height:2px;border-radius:2px;background:transparent;overflow:hidden}
+.sc .p i{display:block;height:100%;width:calc(var(--p,0)*100%);background:var(--text)}
+.sc[aria-current="true"]{background:var(--bg-subtle)}
+.sc[aria-current="true"] .n{color:var(--text)}
+
+/* Escenario */
+.stage{grid-area:stage;position:relative;background:var(--stage);min-height:0;min-width:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.frame{position:relative;width:100%;height:100%;overflow:hidden}
+#c{display:block;width:100%;height:100%;touch-action:none;outline:none}
+.lblroot{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--text-muted);font:500 13px var(--font-mono);letter-spacing:.04em;pointer-events:none;transition:opacity var(--d-base)}
+.fallback{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--text-muted)}
+.fallback div{max-width:42ch}
+.fallback strong{display:block;color:var(--text);font:600 18px var(--font-cond);margin-bottom:6px}
+
+.glass{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(14px) saturate(115%);-webkit-backdrop-filter:blur(14px) saturate(115%);box-shadow:var(--shadow-float)}
+@supports not (backdrop-filter:blur(1px)){.glass{background:var(--surface)}}
+
+.hud{position:absolute;left:12px;top:14px;padding:10px 12px;border-radius:12px;display:grid;gap:5px;min-width:196px;font-size:12px;transition:opacity var(--d-base)}
+.hud[data-empty="true"]{opacity:0;pointer-events:none}
+.hud .row{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.hud .k{color:var(--text-muted)}
+.hud .v{font:500 13px var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hud .foot{font-size:10.5px;color:var(--text-faint);border-top:1px solid var(--glass-border);padding-top:5px;margin-top:2px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:20px;padding-inline:8px;border-radius:999px;font:500 11px/1 var(--font-ui);border:1px solid var(--border-strong);color:var(--text-muted);white-space:nowrap}
+.pill i{width:6px;height:6px;border-radius:50%;background:var(--text-faint)}
+.pill.on{color:var(--text);border-color:var(--c-dc)}
+.pill.on i{background:var(--c-dc);box-shadow:0 0 8px var(--c-dc)}
+
+.tourbar{position:absolute;left:0;right:0;top:0;height:3px;background:transparent;pointer-events:none}
+.tourbar i{display:block;height:100%;width:calc(var(--p,0)*100%);background:var(--text);opacity:.85}
+
+.hint{position:absolute;left:12px;bottom:12px;font-size:11.5px;color:var(--text-muted);pointer-events:none;padding:4px 10px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-border)}
+
+.tip{position:absolute;left:12px;right:12px;bottom:12px;border-radius:12px;padding:12px 14px;display:none}
+.tip strong{display:block;font:600 15px/1.25 var(--font-cond)}
+.tip p{margin:4px 0 0;font-size:12.5px;color:var(--text-muted)}
+.tip button{position:absolute;right:6px;top:6px;width:30px;height:30px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:var(--text-muted)}
+
+.caption{position:absolute;left:0;right:0;bottom:0;padding:48px 6% 6%;display:none;pointer-events:none;
+  background:linear-gradient(to top, color-mix(in srgb, var(--stage) 88%, transparent), transparent)}
+.caption .cn{font:500 12px var(--font-mono);letter-spacing:.08em;color:var(--text-muted)}
+.caption strong{display:block;font:600 clamp(24px,5.2vmin,46px)/1.05 var(--font-cond);margin-top:6px;text-wrap:balance}
+.caption p{margin:10px 0 0;font-size:clamp(14px,2.4vmin,20px);line-height:1.35;color:var(--text);max-width:40ch;text-wrap:balance;transition:opacity var(--d-base)}
+.watermark{position:absolute;left:5%;top:4%;display:none;font:500 11px/1.3 var(--font-mono);letter-spacing:.06em;color:var(--text-muted);pointer-events:none}
+
+.clipbar{position:absolute;top:12px;right:12px;display:none;gap:6px;padding:6px;border-radius:12px;transition:opacity var(--d-base);z-index:5}
+.clipbar .seg{display:flex;gap:2px;padding:2px;border-radius:9px;background:var(--bg-subtle)}
+.clipbar .seg button{height:30px;padding-inline:10px;border:0;border-radius:7px;background:transparent;cursor:pointer;font:500 12px var(--font-mono)}
+.clipbar .seg button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.clipbar .btn{height:34px}
+
+/* Etiquetas 3D */
+.lw{pointer-events:none}
+.lbl{display:flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-border);
+  font:500 11.5px/1.25 var(--font-ui);color:var(--text);white-space:nowrap;opacity:0;transform:translateY(4px);transition:opacity var(--d-base) var(--ease),transform var(--d-base) var(--ease);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lbl.on{opacity:1;transform:none}
+.lbl.hover{opacity:1;transform:none;border-color:var(--text-muted)}
+.lbl i{width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
+.lbl b{font:500 11px var(--font-mono);color:var(--text-muted);font-variant-numeric:tabular-nums}
+.lbl b:empty{display:none}
+
+/* Inspector */
+.insp{grid-area:insp;border-left:1px solid var(--border);background:var(--surface);overflow-y:auto;display:flex;flex-direction:column}
+.insp section{padding:20px 20px 0}
+.card{margin:16px 16px 0;padding:16px!important;border:1px solid var(--border);border-radius:var(--r-card);background:var(--bg-subtle);position:relative;animation:cardIn var(--d-base) var(--ease)}
+@keyframes cardIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.card h3{font:600 17px/1.25 var(--font-cond);margin:6px 32px 6px 0;text-wrap:balance}
+.card p{margin:0;color:var(--text);font-size:13.5px}
+.card .spec{margin-top:10px;font:400 12px/1.45 var(--font-mono);color:var(--text-muted)}
+.card .cnote{margin-top:10px;font-size:12px;color:var(--text-muted);border-left:2px solid var(--border-strong);padding-left:10px}
+.card .x{position:absolute;right:8px;top:8px;width:32px;height:32px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:var(--text-muted);display:grid;place-items:center}
+.card .x:hover{background:var(--surface)}
+.tagrow{display:flex;gap:6px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:6px;height:22px;padding-inline:8px;border-radius:999px;font:500 11px/1 var(--font-ui);background:var(--surface);border:1px solid var(--border);color:var(--text-muted)}
+.tag i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+
+.eyebrow{font:500 11px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint)}
+.insp h1{font:600 26px/1.08 var(--font-cond);margin:8px 0 8px;letter-spacing:-.005em;text-wrap:balance}
+.lead{margin:0;font-size:14.5px;line-height:1.5;color:var(--text);max-width:60ch}
+.steps{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:2px;counter-reset:st}
+.steps li{position:relative;display:grid;grid-template-columns:22px 1fr;gap:8px;padding:8px 10px 10px 8px;border-radius:10px;color:var(--text-faint);font-size:13px;line-height:1.45;transition:color var(--d-base),background var(--d-base);counter-increment:st}
+.steps li::before{content:counter(st);font:500 11px/19px var(--font-mono);color:inherit;text-align:center;border:1px solid currentColor;border-radius:50%;width:20px;height:20px;opacity:.7}
+.steps li.done{color:var(--text-muted)}
+.steps li.active{color:var(--text);background:var(--bg-subtle)}
+.steps li.active::before{opacity:1;background:var(--text);color:var(--bg);border-color:var(--text)}
+.steps li .bar{position:absolute;left:38px;right:12px;bottom:4px;height:2px;border-radius:2px;overflow:hidden;display:none}
+.steps li.active .bar{display:block;background:var(--border)}
+.steps li .bar i{display:block;height:100%;width:calc(var(--p,0)*100%);background:var(--text-muted)}
+.steps.list li{color:var(--text)}
+.steps.list li::before{content:"";width:6px;height:6px;margin:7px 7px 0;border:0;background:var(--text-faint)}
+.note{margin-top:14px;font-size:12px;line-height:1.5;color:var(--text-muted);border-left:2px solid var(--border-strong);padding-left:10px}
+.note:empty{display:none}
+.navrow{display:flex;gap:8px;margin-top:16px}
+.navrow .btn{height:32px;padding-inline:10px;font-size:12.5px}
+.navrow .sp{flex:1}
+
+.legend h2{font:500 11px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:0}
+.legend .muted{font-size:12px;color:var(--text-muted);margin:6px 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;height:30px;padding-inline:10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12.5px;font-weight:500;transition:background var(--d-fast),border-color var(--d-fast),opacity var(--d-fast)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px color-mix(in srgb, var(--c) 22%, transparent)}
+.chip:hover{border-color:var(--border-strong)}
+.chip[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb, var(--c) 10%, var(--surface))}
+.chips.isolating .chip[aria-pressed="false"]{opacity:.55}
+.chip.reset{color:var(--text-muted)}
+.sysdesc{font-size:12px;color:var(--text-muted);margin:10px 0 0;min-height:18px}
+.src{margin-top:auto;padding:20px;font-size:11.5px;color:var(--text-faint);line-height:1.5}
+.src a{color:var(--text-muted)}
+
+.scenebar{grid-area:bar;display:none;gap:6px;overflow-x:auto;padding:10px 12px;border-top:1px solid var(--border);background:var(--surface);scrollbar-width:thin}
+.scenebar button{flex:none;display:inline-flex;align-items:center;gap:6px;height:34px;padding-inline:12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500;position:relative;overflow:hidden}
+.scenebar button span{font:500 11px var(--font-mono);color:var(--text-faint)}
+.scenebar button[aria-current="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.scenebar button[aria-current="true"] span{color:inherit;opacity:.7}
+
+/* Modo clip */
+body.clip .topbar, body.clip .rail, body.clip .insp, body.clip .scenebar, body.clip .hint, body.clip .tip{display:none!important}
+body.clip .app{grid-template-columns:1fr;grid-template-rows:1fr;grid-template-areas:"stage"}
+body.clip .stage{background:#03070d}
+body.clip .frame{flex:none;border-radius:0}
+body.clip .caption, body.clip .watermark{display:block}
+body.clip .clipbar{display:flex}
+body.clip .clipbar.idle{opacity:0}
+
+@media (max-width:1179px){
+  .app{grid-template-columns:minmax(0,1fr) 340px;grid-template-areas:"top top" "stage insp" "bar insp"}
+  .rail{display:none}
+  .scenebar{display:flex}
+}
+@media (max-width:767px){
+  html,body{height:auto}
+  .app{display:block;height:auto}
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;height:56px}
+  .brand span{display:none}
+  .btn .lg{display:none}
+  .stage{height:clamp(340px,60svh,620px)}
+  .scenebar{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:9}
+  .insp{border-left:0}
+  .card{display:none!important}
+  .tip.show{display:block}
+  .hint{display:none}
+  .hud{min-width:0;left:8px;top:10px;padding:8px 10px;font-size:11px}
+  .hud .v{font-size:12px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition-duration:1ms!important;animation-duration:1ms!important}
+}
+</style>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.2"/><path d="M12 9.8c-.6-3 .4-6 2.6-6.6 1.6.9 1.2 4.1-2.6 6.6Z"/><path d="M14 13.3c2.9 1 5 3.3 4.4 5.5-1.7.5-4-1.8-4.4-5.5Z"/><path d="M9.9 13.1c-2.3 2-5.4 2.6-6.9 1 .5-1.8 3.7-2.4 6.9-1Z"/></svg>
+      <div><strong>Sala de máquinas</strong><span>Velero · motor tipo Yanmar 3YM20 · esquema didáctico</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btnTour" type="button" aria-pressed="false"><svg id="icoTour" viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 20 12 7 20 7 4"/></svg><span id="lblTour">Tour <span class="lg">guiado</span></span></button>
+      <button class="btn" id="btnClip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4"/></svg><span>Clip<span class="lg"> para redes</span></span></button>
+    </div>
+  </header>
+
+  <nav class="rail" id="rail" aria-label="Escenas"><h2>Recorrido</h2></nav>
+
+  <main class="stage" id="stage">
+    <div class="frame" id="frame">
+      <canvas id="c" tabindex="0" aria-label="Vista 3D de la sala de máquinas del velero. Arrastra para orbitar y toca un componente para ver qué hace."></canvas>
+      <div class="lblroot" id="lblroot"></div>
+      <div class="loading" id="loading">Montando la sala de máquinas…</div>
+      <div class="fallback" id="fallback" hidden><div><strong>Este navegador no puede mostrar la escena 3D</strong>El recorrido sigue disponible en texto: usa las escenas y el panel de explicación.</div></div>
+      <div class="tourbar" id="tourbar"><i></i></div>
+      <div class="hud glass" id="hud" data-empty="true"></div>
+      <div class="watermark" id="watermark">MOTOR TIPO YANMAR 3YM20<br>ESQUEMA DIDÁCTICO · ANIMACIÓN RALENTIZADA</div>
+      <div class="caption" id="caption"><div class="cn" id="capN"></div><strong id="capT"></strong><p id="capP"></p></div>
+      <div class="hint" id="hint">Arrastra para orbitar · rueda para acercar · toca un componente</div>
+      <div class="tip glass" id="tip"><button type="button" id="tipX" aria-label="Cerrar">✕</button><strong id="tipT"></strong><p id="tipP"></p></div>
+    </div>
+    <div class="clipbar glass" id="clipbar">
+      <div class="seg" role="group" aria-label="Formato">
+        <button type="button" data-ar="0.5625" aria-pressed="true">9:16</button>
+        <button type="button" data-ar="1" aria-pressed="false">1:1</button>
+        <button type="button" data-ar="1.7778" aria-pressed="false">16:9</button>
+      </div>
+      <button class="btn" type="button" id="clipRestart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Reiniciar</button>
+      <button class="btn" type="button" id="clipExit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Salir</button>
+    </div>
+  </main>
+
+  <div class="scenebar" id="scenebar" role="tablist" aria-label="Escenas"></div>
+
+  <aside class="insp" id="insp">
+    <section class="card" id="card" hidden aria-live="polite">
+      <button class="x" id="cardX" type="button" aria-label="Cerrar ficha"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      <div class="tagrow" id="cardTags"></div>
+      <h3 id="cardT"></h3>
+      <p id="cardD"></p>
+      <div class="spec" id="cardS"></div>
+      <div class="cnote" id="cardN"></div>
+    </section>
+    <section>
+      <div class="eyebrow" id="sceneNum">Escena 1 de 8</div>
+      <h1 id="sceneTitle">El sistema completo</h1>
+      <p class="lead" id="sceneLead"></p>
+      <ol class="steps" id="steps"></ol>
+      <div class="note" id="sceneNote"></div>
+      <div class="navrow">
+        <button class="btn" type="button" id="prevBtn" aria-label="Escena anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Anterior</button>
+        <button class="btn" type="button" id="replayBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Repetir</button>
+        <span class="sp"></span>
+        <button class="btn" type="button" id="nextBtn" aria-label="Escena siguiente">Siguiente<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+    </section>
+    <section class="legend">
+      <h2>Sistemas</h2>
+      <p class="muted">Toca uno para aislarlo en la escena.</p>
+      <div class="chips" id="chips"></div>
+      <p class="sysdesc" id="sysdesc"></p>
+    </section>
+    <footer class="src">Datos del motor: <a href="https://www.yanmar.com/marine/es/product/engines/3ym20/" target="_blank" rel="noopener">ficha técnica Yanmar 3YM20</a>. Instalación, recorridos y proporciones simplificados con fines didácticos.</footer>
+  </aside>
+</div>
+
+<script>
+  // Si el módulo 3D no llega a cargar (CDN bloqueado, sin WebGL), el texto sigue siendo útil.
+  setTimeout(function(){ if(!window.__salaReady){ var f=document.getElementById('fallback'); var l=document.getElementById('loading'); if(f) f.hidden=false; if(l) l.style.opacity=0; } }, 12000);
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* =========================================================================
+   0 · Utilidades
+   ========================================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const damp = (a, b, k, dt) => lerp(a, b, 1 - Math.exp(-k * dt));
+const approach = (a, b, rate, dt) => (a < b ? Math.min(b, a + rate * dt) : Math.max(b, a - rate * dt));
+const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const fmtV = v => v.toFixed(1).replace('.', ',') + ' V';
+const fmtInt = n => Math.round(n).toLocaleString('es-ES');
+const TAU = Math.PI * 2;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+
+/* =========================================================================
+   1 · Contenido: sistemas, componentes, escenas
+   ========================================================================= */
+const SYS = {
+  fuel:  { name: 'Combustible',      desc: 'Gasóil del depósito al prefiltro, la bomba de inyección y los inyectores.' },
+  dc:    { name: 'Eléctrico 12 V DC', desc: 'Baterías, motor de arranque, alternador, separador y consumos de servicio.' },
+  ac:    { name: 'AC 230 V',          desc: 'Salida del inversor hacia los enchufes de a bordo.' },
+  sea:   { name: 'Agua de mar',       desc: 'Circuito abierto: entra por el casco, enfría el intercambiador y sale por el escape.' },
+  fresh: { name: 'Agua dulce',        desc: 'Circuito cerrado con refrigerante que recorre el bloque y la culata.' },
+  exh:   { name: 'Escape',            desc: 'Gases calientes de los cilindros hacia la salida de popa.' },
+  mech:  { name: 'Transmisión',       desc: 'Giro del cigüeñal → volante → inversora → eje → hélice.' },
+};
+const SYS_KEYS = Object.keys(SYS);
+
+const TAGS = { motor: 'Equipo del motor', inst: 'Instalación típica' };
+const INFO = {
+  motor:        { n: 'Motor diésel 3YM20', sys: 'mech', tag: 'motor', d: 'Tres cilindros y cuatro tiempos. Convierte la energía del gasóil en giro del cigüeñal.', s: '15,3 kW (21 CV) a 3.600 rpm · 0,854 L · 3 cilindros', a: [-0.35, 0.62, 0.66] },
+  tapa:         { n: 'Tapa de balancines', sys: 'mech', tag: 'motor', d: 'Cubre balancines y válvulas, que abren y cierran la admisión y el escape en cada ciclo.', a: [0, 2.0, 0] },
+  culata:       { n: 'Culata e inyectores', sys: 'fuel', tag: 'motor', d: 'Cierra los cilindros por arriba. Los inyectores pulverizan el gasóil dentro del aire comprimido.', s: 'Inyección indirecta', a: [0.55, 1.6, -0.5] },
+  cilindros:    { n: 'Pistones y cigüeñal', sys: 'mech', tag: 'motor', d: 'Al comprimirse, el aire se calienta tanto que el gasóil arde solo, sin bujía. Cada combustión empuja un pistón y el cigüeñal convierte ese empuje en giro.', s: 'Diámetro × carrera: 70 × 74 mm', a: [0, 1.12, 0] },
+  volante:      { n: 'Volante motor', sys: 'mech', tag: 'motor', d: 'Disco pesado que acumula inercia y suaviza los impulsos. En su corona dentada engrana el motor de arranque.', a: [1.13, 1.25, 0] },
+  inversora:    { n: 'Inversora', sys: 'mech', tag: 'motor', d: 'Selecciona avante, punto muerto o atrás y reduce las vueltas que llegan al eje.', s: 'Con línea de eje: inversora KM2P-1. Alternativa de fábrica: cola saildrive.', a: [1.55, 1.05, 0.3] },
+  eje:          { n: 'Eje y bocina', sys: 'mech', tag: 'inst', d: 'El eje lleva el giro a través del casco. La bocina sella el paso para que no entre agua.', a: [3.0, 0.12, 0] },
+  helice:       { n: 'Hélice', sys: 'mech', tag: 'inst', d: 'Convierte el giro en empuje. Al dar atrás, la inversora invierte el sentido de giro.', a: [4.75, -1.15, 0] },
+  arranque:     { n: 'Motor de arranque', sys: 'dc', tag: 'motor', d: 'Motor eléctrico de gran potencia. Al girar la llave, su piñón engrana con el volante y hace girar el diésel hasta que arranca.', s: '12 V · 1,4 kW', a: [0.78, 0.95, 0.95] },
+  alternador:   { n: 'Alternador', sys: 'dc', tag: 'motor', d: 'Lo mueve la correa del cigüeñal. Con el motor en marcha genera corriente y repone las baterías.', s: '12 V · 125 A en la ficha actual (versiones anteriores, 60–80 A)', a: [-1.15, 1.9, 0.66] },
+  bomba_mar:    { n: 'Bomba de agua de mar', sys: 'sea', tag: 'motor', d: 'Accionada por engranaje. Aspira agua de mar y la empuja hacia el intercambiador.', a: [-1.3, 0.78, 0.72] },
+  intercambiador:{ n: 'Intercambiador de calor', sys: 'fresh', tag: 'motor', d: 'El agua dulce del motor cede su calor al agua de mar a través de un haz de tubos, sin mezclarse. Incluye el depósito de expansión.', s: 'Refrigeración por agua dulce con intercambiador (de serie)', a: [-0.15, 2.42, 0.28] },
+  colector:     { n: 'Colector de escape', sys: 'exh', tag: 'motor', d: 'Recoge los gases calientes de los tres cilindros.', a: [0.1, 1.42, 0.8] },
+  codo:         { n: 'Codo mezclador', sys: 'exh', tag: 'motor', d: 'Inyecta el agua de mar en el escape: enfría los gases y permite usar manguera de goma.', a: [1.2, 2.25, 0.72] },
+  admision:     { n: 'Admisión de aire', sys: 'mech', tag: 'motor', d: 'Silenciador por el que el motor respira. Un diésel necesita mucho aire limpio.', a: [-0.55, 1.75, -0.85] },
+  inyeccion:    { n: 'Bomba de inyección', sys: 'fuel', tag: 'motor', d: 'Eleva la presión del gasóil y lo envía a cada inyector en el instante justo.', s: 'Bomba en línea', a: [0.05, 1.12, -0.85] },
+  deposito:     { n: 'Depósito de gasóil', sys: 'fuel', tag: 'inst', d: 'Reserva de combustible. Suele ir bajo la bañera o bajo un asiento.', a: [3.1, 1.6, -1.25] },
+  filtro_gasoil:{ n: 'Prefiltro separador de agua', sys: 'fuel', tag: 'inst', d: 'Retiene suciedad y agua antes de la bomba de inyección, muy sensible a ambas. El vaso transparente deja ver el agua decantada.', a: [2.0, 1.75, -1.0] },
+  bat_arranque: { n: 'Batería de arranque', sys: 'dc', tag: 'inst', d: 'Reservada para arrancar. Debe quedar siempre llena, protegida de los consumos de a bordo.', a: [-2.45, 0.85, -1.0] },
+  bat_servicio: { n: 'Banco de servicio', sys: 'dc', tag: 'inst', d: 'Alimenta luces, VHF, instrumentos e inversor. Es el que se vacía con el barco fondeado.', a: [-2.45, 0.85, 0.47] },
+  vsr:          { n: 'Separador de baterías (VSR)', sys: 'dc', tag: 'inst', d: 'Une los dos bancos sólo cuando detecta tensión de carga y los separa cuando cae. Así los consumos nunca vacían la batería de arranque.', s: 'Muchos modelos unen hacia 13,3 V y separan entre 12,7 y 13 V.', note: 'Esquema típico. Otras instalaciones usan repartidor de diodos, cargador DC-DC o separador FET.', a: [-3.0, 1.42, -0.35] },
+  cuadro_dc:    { n: 'Cuadro de distribución DC', sys: 'dc', tag: 'inst', d: 'Reparte el banco de servicio en circuitos protegidos: luces, electrónica, bombas.', a: [-4.85, 2.12, 1.05] },
+  vhf:          { n: 'Emisora VHF', sys: 'dc', tag: 'inst', d: 'Consumo de servicio. Se alimenta del banco de servicio, nunca de la batería de arranque.', a: [-4.8, 2.4, 0.42] },
+  instrumentos: { n: 'Instrumentación', sys: 'dc', tag: 'inst', d: 'Corredera, sonda y viento. Consumen poco, pero están encendidos durante horas.', a: [-4.85, 2.45, -0.08] },
+  luz:          { n: 'Iluminación', sys: 'dc', tag: 'inst', d: 'Luces interiores LED alimentadas desde el banco de servicio.', a: [-4.75, 3.08, -0.55] },
+  inversor:     { n: 'Inversor', sys: 'ac', tag: 'inst', d: 'Convierte la energía DC almacenada en energía AC para consumos a bordo. Pide mucha corriente: 1.000 W de salida exigen del orden de 90 A a 12 V.', a: [-4.1, 0.55, -0.45] },
+  toma_ac:      { n: 'Toma 230 V', sys: 'ac', tag: 'inst', d: 'Enchufe alimentado por el inversor.', a: [-4.85, 1.62, -0.92] },
+  portatil:     { n: 'Portátil cargando', sys: 'ac', tag: 'inst', d: 'Consumo AC de ejemplo: unos 65 W, que salen del banco de servicio como unos 6 A a 12 V.', a: [-4.55, 1.68, -0.72] },
+  panel:        { n: 'Panel de mando', sys: 'dc', tag: 'motor', d: 'Llave, cuentavueltas y testigos. En START, la llave activa el relé del motor de arranque. Con el motor en marcha, los testigos de aceite y carga se apagan.', s: 'De serie en el 3YM20: panel B20', a: [1.95, 3.32, 0.9] },
+  toma_mar:     { n: 'Toma de mar', sys: 'sea', tag: 'inst', d: 'Grifo en el casco por el que entra el agua de refrigeración. Debe estar abierto antes de arrancar.', a: [-1.5, -0.72, 0.92] },
+  filtro_mar:   { n: 'Filtro de agua de mar', sys: 'sea', tag: 'inst', d: 'Retiene algas y suciedad antes de la bomba.', a: [-1.75, 0.92, 1.05] },
+  waterlock:    { n: 'Waterlock', sys: 'exh', tag: 'inst', d: 'Silenciador que recoge el agua del escape y evita que vuelva al motor al pararlo.', a: [2.08, 0.95, 1.05] },
+  salida:       { n: 'Salida de escape', sys: 'exh', tag: 'inst', d: 'Gases y agua salen juntos por la popa. Si no sale agua, hay que parar y revisar la refrigeración.', a: [5.6, 1.85, 0.85] },
+};
+
+const ALL = v => ({ fuel: v, dc: v, ac: v, sea: v, fresh: v, exh: v, mech: v });
+const RUNNING = { vs: 14.0, vh: 13.6, vsr: true };
+
+const SCENES = [
+  { key: 'general', name: 'Vista general', sub: 'El sistema completo',
+    title: 'El sistema completo',
+    lead: 'Un diésel de 21 CV mueve el barco y, a la vez, recarga las baterías que alimentan la vida a bordo.',
+    cam: { p: [6.6, 5.2, 9.0], t: [-0.5, 0.9, 0] }, dur: 7, spin: 0.35,
+    labels: ['motor', 'alternador', 'bat_arranque', 'bat_servicio', 'inversor', 'deposito', 'helice', 'panel'],
+    hud: ['rpm', 'vs', 'vh', 'vsr'], list: true,
+    steps: [{ txt: 'Gasóil → combustión → giro del cigüeñal.' }, { txt: 'El giro mueve la hélice y, por correa, el alternador.' }, { txt: 'El alternador carga las baterías; las baterías alimentan consumos e inversor.' }],
+    note: 'Disposición típica de un velero de crucero; cada barco varía. Proporciones simplificadas.',
+    init: RUNNING,
+    ctl: () => ({ rpm: 850, key: 1, combust: 1, loads: 1, block: 1, vis: ALL(0.42) }) },
+
+  { key: 'arranque', name: 'Arranque', sub: 'De la llave a la primera combustión',
+    title: 'Cómo arranca',
+    lead: 'La batería de arranque alimenta el motor de arranque para poner en giro el diésel. Cuando comprime y recibe gasóil, sigue girando por sí solo.',
+    cam: { p: [3.7, 3.3, 6.6], t: [-0.55, 0.95, 0.1] }, dur: 11, loop: 13,
+    labels: ['panel', 'bat_arranque', 'arranque', 'cilindros', 'inyeccion'],
+    hud: ['rpm', 'vs'],
+    steps: [
+      { at: 0.3, txt: 'Llave en START: el panel activa el relé del motor de arranque.' },
+      { at: 1.0, txt: 'La batería de arranque entrega una gran corriente al motor de arranque.' },
+      { at: 1.7, txt: 'Su piñón engrana con el volante y hace girar el diésel.' },
+      { at: 2.4, txt: 'Los pistones comprimen el aire; la bomba envía gasóil a los inyectores.' },
+      { at: 3.4, txt: 'El gasóil se inflama solo en el aire caliente: primeras combustiones.' },
+      { at: 4.6, txt: 'El motor gira por sí mismo. Se suelta la llave y el alternador empieza a cargar.' },
+    ],
+    note: 'Animación ralentizada. Valores de rpm y tensión ilustrativos: la batería cae varios voltios durante el arranque y se recupera después.',
+    init: { vs: 12.7, vh: 12.6, vsr: false },
+    ctl: t => {
+      const crank = t >= 1.0 && t < 4.6, run = t >= 4.6 && t < 11.6;
+      return { rpm: crank ? 260 : run ? 850 : 0, starter: crank ? 1 : 0, key: t < 0.3 ? 0 : t < 4.6 ? 2 : run ? 1 : 0,
+        combust: t >= 3.4 && t < 11.6 ? 1 : 0, block: t > 0.6 ? 0.3 : 1,
+        vis: { fuel: t > 2.2 ? 1 : 0.15, dc: 1, ac: 0, sea: 0.45, fresh: 0.3, exh: 0.75, mech: 0.3 } };
+    } },
+
+  { key: 'marcha', name: 'En marcha', sub: 'Del pistón a la hélice',
+    title: 'Del pistón a la hélice',
+    lead: 'Las combustiones empujan los pistones; el cigüeñal convierte ese empuje en giro, la inversora lo adapta y el eje lo lleva a la hélice.',
+    cam: { p: [5.4, 2.5, 6.4], t: [2.0, 0.35, 0] }, dur: 8,
+    labels: ['cilindros', 'volante', 'inversora', 'eje', 'helice'],
+    hud: ['rpm', 'gear'],
+    steps: [
+      { at: 0, txt: 'Cada combustión empuja un pistón hacia abajo; los tres se turnan.' },
+      { at: 1.0, txt: 'El cigüeñal convierte el vaivén en giro; el volante lo suaviza.' },
+      { at: 1.6, txt: 'La inversora engrana avante y reduce las vueltas.' },
+      { at: 3.0, txt: 'El eje cruza el casco por la bocina y hace girar la hélice.' },
+      { at: 4.4, txt: 'La hélice empuja agua hacia popa: el barco avanza.' },
+    ],
+    note: 'Representado con línea de eje e inversora. Muchos 3YM20 llevan cola saildrive: mismo principio, otra geometría.',
+    init: RUNNING,
+    ctl: t => ({ rpm: 2400, key: 1, combust: 1, gear: t > 1.6 ? 1 : 0, block: 0.35,
+      vis: { fuel: 0.55, dc: 0.22, ac: 0, sea: 0.3, fresh: 0.28, exh: 0.5, mech: 1 } }) },
+
+  { key: 'carga', name: 'Carga de baterías', sub: 'Alternador y separador',
+    title: 'Carga y separación de baterías',
+    lead: 'Una vez en marcha, el alternador repone energía. Un separador decide cuándo comparten la carga los dos bancos.',
+    cam: { p: [1.3, 3.7, 5.7], t: [-2.6, 1.05, 0] }, dur: 16, loop: 18,
+    labels: ['alternador', 'bat_arranque', 'vsr', 'bat_servicio', 'cuadro_dc', 'vhf', 'luz'],
+    hud: ['rpm', 'vs', 'vh', 'vsr'],
+    steps: [
+      { at: 0, txt: 'Motor parado: el separador está abierto. Luces, VHF e instrumentos tiran sólo del banco de servicio.' },
+      { at: 5.0, txt: 'Arranque: la batería de arranque, aislada y llena, hace su trabajo.' },
+      { at: 5.8, txt: 'Motor en marcha: el alternador carga la batería de arranque y su tensión sube.' },
+      { when: () => S.vsrClosed && S.vsrAt >= 0, txt: 'Al superar unos 13,3 V, el separador une los dos bancos.' },
+      { when: t => S.vsrClosed && S.vsrAt >= 0 && t > S.vsrAt + 1.6, txt: 'El banco de servicio también se carga. Al parar el motor y caer la tensión, se vuelven a separar.' },
+    ],
+    note: 'Esquema típico con relé sensible a tensión (VSR/ACR). También existen repartidores de diodos, cargadores DC-DC o separadores FET; la lógica de proteger la batería de arranque es la misma.',
+    init: { vs: 12.7, vh: 12.45, vsr: false },
+    ctl: t => {
+      const on = t >= 5.0 && t < 16.4, crank = t >= 5.0 && t < 5.7;
+      return { rpm: !on ? 0 : crank ? 260 : 1500, starter: crank ? 1 : 0, key: on ? (crank ? 2 : 1) : 0, combust: on && t >= 5.4 ? 1 : 0,
+        loads: 1, block: 1, vis: { fuel: 0.12, dc: 1, ac: 0, sea: 0.12, fresh: 0.08, exh: 0.15, mech: 0.1 } };
+    } },
+
+  { key: 'inversor', name: 'Inversor', sub: '12 V que se vuelven 230 V',
+    title: '12 V que se vuelven 230 V',
+    lead: 'El inversor convierte la energía DC almacenada en energía AC para consumos a bordo, con el motor parado.',
+    cam: { p: [-0.7, 3.0, 4.7], t: [-3.95, 1.0, -0.2] }, dur: 8,
+    labels: ['bat_servicio', 'inversor', 'toma_ac', 'portatil'],
+    hud: ['vh', 'ac'],
+    steps: [
+      { at: 0.4, txt: 'El banco de servicio entrega 12 V DC al inversor.' },
+      { at: 1.4, txt: 'El inversor los convierte en 230 V AC.' },
+      { at: 2.4, txt: 'La toma alimenta un consumo doméstico: aquí, un portátil.' },
+      { at: 3.8, txt: 'El precio: 65 W en AC son unos 6 A del banco. Un hervidor de 1.000 W pediría unos 90 A.' },
+    ],
+    note: 'Potencias y corrientes de ejemplo. Un inversor grande va con cable grueso, fusible propio y lo más cerca posible de las baterías.',
+    init: { vs: 12.7, vh: 12.55, vsr: false },
+    ctl: t => ({ rpm: 0, key: 0, loads: 0.5, inv: t > 0.4 ? 1 : 0, ac: t > 1.4 ? 1 : 0, block: 1,
+      vis: { fuel: 0, dc: 1, ac: 1, sea: 0, fresh: 0, exh: 0, mech: 0 } }) },
+
+  { key: 'refrigeracion', name: 'Refrigeración', sub: 'Agua de mar, agua dulce y escape',
+    title: 'Agua de mar, agua dulce y gases',
+    lead: 'Dos circuitos de agua mantienen el motor a temperatura; el agua de mar acaba mezclada con los gases de escape.',
+    cam: { p: [5.3, 4.5, 8.4], t: [1.25, 0.9, 0.4] }, dur: 10,
+    labels: ['toma_mar', 'filtro_mar', 'bomba_mar', 'intercambiador', 'codo', 'waterlock', 'salida'],
+    hud: ['rpm'],
+    steps: [
+      { at: 0, txt: 'La toma de mar deja entrar agua; el filtro retiene algas y suciedad.' },
+      { at: 1.5, txt: 'La bomba de agua de mar la empuja hacia el intercambiador.' },
+      { at: 3.0, txt: 'Por dentro del motor circula agua dulce con refrigerante, en circuito cerrado.' },
+      { at: 4.5, txt: 'El intercambiador pasa el calor del agua dulce al agua de mar.' },
+      { at: 5.8, txt: 'En el codo mezclador, el agua de mar entra en el escape y enfría los gases.' },
+      { at: 7.4, txt: 'El waterlock recoge el agua y la mezcla sale por la popa.' },
+    ],
+    note: 'Recorrido simplificado. En el 3YM20 la refrigeración es por agua dulce con intercambiador; la bomba de agua de mar va accionada por engranaje.',
+    init: RUNNING,
+    ctl: t => ({ rpm: 1800, key: 1, combust: 1, block: 0.5,
+      vis: { fuel: 0.14, dc: 0.1, ac: 0, sea: 1, fresh: t > 3 ? 1 : 0.1, exh: t > 5.8 ? 1 : 0.12, mech: 0.15 } }) },
+
+  { key: 'anatomia', name: 'Vista explotada', sub: 'Qué hay dentro',
+    title: 'Anatomía del motor',
+    lead: 'Separamos las piezas para ver qué hay dentro del bloque y cómo encaja cada equipo.',
+    cam: { p: [3.4, 2.9, 5.2], t: [0, 1.15, 0] }, dur: 8, spin: 0.5,
+    labels: ['tapa', 'culata', 'cilindros', 'alternador', 'arranque', 'intercambiador', 'inversora', 'volante'],
+    hud: [], list: true,
+    steps: [{ txt: 'Arriba: tapa de balancines, culata con inyectores e intercambiador.' }, { txt: 'Dentro del bloque: tres pistones sobre el cigüeñal.' }, { txt: 'Detrás: volante e inversora. Delante: la correa mueve el alternador.' }, { txt: 'A los lados: motor de arranque, colector de escape y bomba de inyección.' }],
+    note: 'Piezas separadas con fines didácticos.',
+    init: RUNNING,
+    ctl: () => ({ rpm: 0, spin: 0.22, explode: 1, block: 0.16, vis: ALL(0), pipeDim: 0.12 }) },
+
+  { key: 'resumen', name: 'Resumen', sub: 'Todo a la vez',
+    title: 'Todo a la vez',
+    lead: 'Gasóil en giro; giro en empuje y en electricidad; electricidad en vida a bordo.',
+    cam: { p: [7.4, 5.9, 10.0], t: [-0.4, 0.9, 0] }, dur: 9, spin: 0.9,
+    labels: ['motor', 'alternador', 'vsr', 'inversor', 'helice', 'salida'],
+    hud: ['rpm', 'vs', 'vh', 'vsr'], list: true,
+    steps: [{ txt: 'Combustible → combustión → cigüeñal.' }, { txt: 'Cigüeñal → inversora → eje → hélice: empuje.' }, { txt: 'Correa → alternador → batería de arranque → separador → banco de servicio.' }, { txt: 'Banco de servicio → cuadro DC e inversor → consumos.' }, { txt: 'Agua de mar → intercambiador → codo → popa.' }],
+    note: 'Esquema didáctico de una instalación típica. Datos del motor según la ficha técnica de Yanmar.',
+    init: RUNNING,
+    ctl: () => ({ rpm: 2200, key: 1, combust: 1, gear: 1, loads: 1, inv: 1, ac: 1, block: 1, vis: ALL(0.9) }) },
+];
+SCENES.forEach(sc => (sc.steps || []).forEach(st => { if (!st.when) { const at = st.at ?? 0; st.when = t => t >= at; } }));
+const TOUR_TOTAL = SCENES.reduce((a, s) => a + s.dur, 0);
+
+/* =========================================================================
+   2 · Tema → colores 3D
+   ========================================================================= */
+const isDark = () => {
+  const d = document.documentElement.dataset.theme;
+  if (d === 'dark' || d === 'light') return d === 'dark';
+  return matchMedia('(prefers-color-scheme: dark)').matches;
+};
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const T3 = {
+  dark:  { top: '#0f2036', hor: '#0a1729', bot: '#03080f', fog: '#07111F', water: '#0c3550', waterLine: '#2b8fb3', waterA: 0.5, hull: '#9fc2e6', hullA: 0.07, rib: '#7ea6cc', ribA: 0.28, cut: '#b9d6f2', sole: '#142131', bulk: '#16263a', neutral: '#2a3442', hl: '#5aa9e6', bloom: 0.85 },
+  light: { top: '#f4f7fb', hor: '#e8eef5', bot: '#c9d5e2', fog: '#E7EDF4', water: '#7fb3cf', waterLine: '#2f7fa6', waterA: 0.38, hull: '#5b7ea3', hullA: 0.06, rib: '#5b7896', ribA: 0.32, cut: '#36597d', sole: '#cdd6e0', bulk: '#d6dee7', neutral: '#8e9aab', hl: '#4f8ed0', bloom: 0.28 },
+};
+let TH = T3.dark;
+const SC = {}; // colores de sistema (THREE.Color)
+
+/* =========================================================================
+   3 · Renderer, escena, cámara
+   ========================================================================= */
+const frame = $('#frame'), canvas = $('#c');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+} catch (e) {
+  $('#fallback').hidden = false; $('#loading').style.opacity = 0; throw e;
+}
+const isTouch = matchMedia('(pointer: coarse)').matches;
+let DPR = Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 2);
+renderer.setPixelRatio(DPR);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 140);
+camera.position.set(6.6, 5.2, 9.0);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.55;
+scene.fog = new THREE.Fog(0x07111f, 24, 48);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 2.4; controls.maxDistance = 22;
+controls.maxPolarAngle = 1.68; controls.target.set(-0.5, 0.9, 0);
+controls.autoRotate = !RM; controls.autoRotateSpeed = 0.35;
+let userTouchedAt = -1e9;
+controls.addEventListener('start', () => { userTouchedAt = performance.now(); controls.autoRotate = false; });
+
+const labelRenderer = new CSS2DRenderer({ element: $('#lblroot') });
+
+const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+const composer = new EffectComposer(renderer, rt);
+composer.setPixelRatio(DPR);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.85, 0.55, 0.78);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+// Cielo de estudio (degradado)
+const domeMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: { uTop: { value: new THREE.Color() }, uHor: { value: new THREE.Color() }, uBot: { value: new THREE.Color() } },
+  vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+  fragmentShader: 'uniform vec3 uTop,uHor,uBot; varying vec3 vP; void main(){ float h=vP.y; vec3 c = h>0.0 ? mix(uHor,uTop,smoothstep(0.0,0.55,h)) : mix(uHor,uBot,smoothstep(0.0,0.3,-h)); gl_FragColor = vec4(c,1.0); }',
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(70, 32, 16), domeMat));
+
+// Luces
+scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x0b1626, 0.55));
+const key = new THREE.DirectionalLight(0xffffff, 2.3);
+key.position.set(6, 11, 7); key.castShadow = true;
+key.shadow.mapSize.set(isTouch ? 1024 : 2048, isTouch ? 1024 : 2048);
+Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 40 });
+key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x8fbfff, 1.1); rim.position.set(-8, 4, -6); scene.add(rim);
+const cabinLight = new THREE.PointLight(0xffd7a0, 0, 4.5, 2); cabinLight.position.set(-4.55, 2.75, -0.55); scene.add(cabinLight);
+
+/* =========================================================================
+   4 · Ayudantes de construcción
+   ========================================================================= */
+const comps = {};        // id -> { group, mats:Set, explode:Vector3, h, label }
+const pickables = [];
+const fadeMats = [];     // materiales del bloque que se vuelven translúcidos
+const powerMats = [];    // { mat, color, get:()=>0..1 }
+const ENGINE_IDS = ['motor', 'tapa', 'culata', 'cilindros', 'volante', 'inversora', 'arranque', 'alternador', 'bomba_mar', 'intercambiador', 'colector', 'codo', 'admision', 'inyeccion'];
+
+function comp(id) {
+  const g = new THREE.Group(); g.userData.compId = id; scene.add(g);
+  comps[id] = { id, group: g, mats: new Set(), explode: new THREE.Vector3(), h: 0 };
+  return g;
+}
+function mat(cid, color, o = {}) {
+  const m = new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.5, metalness: o.m ?? 0.15,
+    transparent: !!o.t, opacity: o.o ?? 1, side: o.side ?? THREE.FrontSide, depthWrite: !o.t });
+  if (o.map) m.map = o.map;
+  if (o.e) { m.emissive.set(o.e); m.emissiveIntensity = o.ei ?? 1; }
+  if (o.emap) m.emissiveMap = o.emap;
+  m.userData.base = m.emissive.clone(); m.userData.ei = m.emissiveIntensity;
+  if (cid) comps[cid].mats.add(m);
+  return m;
+}
+function part(cid, geo, m, x, y, z, o = {}) {
+  const mesh = new THREE.Mesh(geo, m);
+  mesh.position.set(x, y, z);
+  if (o.order) mesh.rotation.order = o.order;
+  if (o.rot) mesh.rotation.set(o.rot[0], o.rot[1], o.rot[2]);
+  if (o.scale) mesh.scale.set(o.scale[0], o.scale[1], o.scale[2]);
+  mesh.castShadow = o.cast ?? !m.transparent; mesh.receiveShadow = true;
+  (o.parent || comps[cid].group).add(mesh);
+  if (o.pick !== false) { mesh.userData.pickComp = cid; pickables.push(mesh); }
+  return mesh;
+}
+const rbox = (w, h, d, r = 0.05, s = 3) => new RoundedBoxGeometry(w, h, d, s, Math.min(r, Math.min(w, h, d) / 2 - 0.002));
+const cylX = (r, len, seg = 28, r2) => { const g = new THREE.CylinderGeometry(r2 ?? r, r, len, seg); g.rotateZ(-Math.PI / 2); return g; };
+const cylY = (r, len, seg = 28, r2) => new THREE.CylinderGeometry(r2 ?? r, r, len, seg);
+const cylZ = (r, len, seg = 28) => { const g = new THREE.CylinderGeometry(r, r, len, seg); g.rotateX(Math.PI / 2); return g; };
+function power(m, color, get) { powerMats.push({ m, c: new THREE.Color(color), get }); }
+
+const FONT = (w, px, fam = 'IBM Plex Sans') => `${w} ${px}px "${fam}", system-ui, sans-serif`;
+function tex(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); draw(g, w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+function plate(text, sub, accent, w = 512, h = 256) {
+  return tex(w, h, (g) => {
+    g.fillStyle = '#1b2129'; g.fillRect(0, 0, w, h);
+    g.fillStyle = accent; g.fillRect(0, 0, w, 14);
+    g.fillStyle = '#e9eef5'; g.font = FONT(600, Math.round(h * 0.27), 'IBM Plex Sans Condensed'); g.fillText(text, 28, h * 0.52);
+    if (sub) { g.fillStyle = '#93a4b6'; g.font = FONT(500, Math.round(h * 0.15), 'IBM Plex Mono'); g.fillText(sub, 28, h * 0.82); }
+  });
+}
+function screen(lines, bg = '#08131f', fg = '#bfe9ff', w = 256, h = 160) {
+  return tex(w, h, (g) => {
+    g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    lines.forEach(([txt, px, y, col, fam, wt]) => { g.fillStyle = col || fg; g.font = FONT(wt || 500, px, fam || 'IBM Plex Mono'); g.textAlign = 'center'; g.fillText(txt, w / 2, y); });
+  });
+}
+
+/* =========================================================================
+   5 · Casco en corte, agua, estructura
+   ========================================================================= */
+const X0 = -6.5, X1 = 5.6, YS = 3.4, WL = 1.2;
+const yK = x => -0.7 + Math.max(0, x - 2) * 0.25;
+const Bw = x => (x < -4 ? 3.0 - (-4 - x) * 0.55 : x > 1.5 ? 3.0 - (x - 1.5) * 0.15 : 3.0);
+const hullPt = (x, a, side) => { const k = yK(x); return V3(x, k + (YS - k) * (1 - Math.cos(a)), side * Bw(x) * Math.sin(a)); };
+
+const hullMat = new THREE.MeshStandardMaterial({ color: 0x9fc2e6, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, roughness: 0.35, metalness: 0 });
+const ribMat = new THREE.LineBasicMaterial({ color: 0x7ea6cc, transparent: true, opacity: 0.28, depthWrite: false });
+const cutMat = new THREE.LineBasicMaterial({ color: 0xb9d6f2, transparent: true, opacity: 0.6, depthWrite: false });
+const wlMat = new THREE.LineBasicMaterial({ color: 0x2b8fb3, transparent: true, opacity: 0.9, depthWrite: false });
+
+function hullSurface(side, aMax, nx = 96, na = 22) {
+  const pos = [], idx = [];
+  for (let i = 0; i <= nx; i++) { const x = lerp(X0, X1, i / nx); for (let j = 0; j <= na; j++) { const p = hullPt(x, aMax * j / na, side); pos.push(p.x, p.y, p.z); } }
+  for (let i = 0; i < nx; i++) for (let j = 0; j < na; j++) { const a = i * (na + 1) + j, b = a + na + 1; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+  const g = new THREE.BufferGeometry(); g.setIndex(idx); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, hullMat); m.renderOrder = 1; scene.add(m);
+}
+const A_STB = 0.62;
+hullSurface(-1, Math.PI / 2); hullSurface(1, A_STB);
+{ // cuadernas y líneas
+  const seg = [], cut = [], wl = [];
+  const section = (x, arr) => {
+    const pts = [];
+    for (let j = 16; j >= 0; j--) pts.push(hullPt(x, A_STB * j / 16, 1));
+    for (let j = 1; j <= 24; j++) pts.push(hullPt(x, (Math.PI / 2) * j / 24, -1));
+    for (let i = 0; i < pts.length - 1; i++) arr.push(pts[i], pts[i + 1]);
+  };
+  for (let x = X0 + 0.6; x < X1 - 0.1; x += 0.6) section(x, seg);
+  section(X0, cut); section(X1, cut);
+  const longi = (a, side, arr) => { let prev = null; for (let i = 0; i <= 80; i++) { const p = hullPt(lerp(X0, X1, i / 80), a, side); if (prev) arr.push(prev, p); prev = p; } };
+  longi(Math.PI / 2, -1, cut); longi(0, 1, cut); longi(A_STB, 1, cut); longi(0.9, -1, seg); longi(0.35, -1, seg);
+  let prev = null;
+  for (let i = 0; i <= 80; i++) { const x = lerp(X0, X1, i / 80), k = yK(x); const c = 1 - (WL - k) / (YS - k); const p = V3(x, WL, -Bw(x) * Math.sqrt(Math.max(0, 1 - c * c))); if (prev) wl.push(prev, p); prev = p; }
+  const L = (arr, m) => { const g = new THREE.BufferGeometry().setFromPoints(arr); const l = new THREE.LineSegments(g, m); l.renderOrder = 2; scene.add(l); };
+  L(seg, ribMat); L(cut, cutMat); L(wl, wlMat);
+  // espejo de popa
+  const sh = new THREE.Shape(); const tp = [];
+  for (let j = 24; j >= 0; j--) tp.push(hullPt(X1, (Math.PI / 2) * j / 24, -1));
+  for (let j = 1; j <= 24; j++) tp.push(hullPt(X1, (Math.PI / 2) * j / 24, 1));
+  tp.forEach((p, i) => (i ? sh.lineTo(-p.z, p.y) : sh.moveTo(-p.z, p.y)));
+  const tm = new THREE.Mesh(new THREE.ShapeGeometry(sh), hullMat); tm.rotation.y = Math.PI / 2; tm.position.x = X1; tm.renderOrder = 1; scene.add(tm);
+  const tl = []; for (let i = 0; i < tp.length - 1; i++) tl.push(V3(X1, tp[i].y, tp[i].z), V3(X1, tp[i + 1].y, tp[i + 1].z)); L(tl, cutMat);
+}
+// Orza y timón (fantasma)
+const ghostMat = new THREE.MeshStandardMaterial({ color: 0xcfe0f2, transparent: true, opacity: 0.1, depthWrite: false, roughness: 0.4 });
+const ghostEdge = new THREE.LineBasicMaterial({ color: 0xb9d6f2, transparent: true, opacity: 0.45 });
+function ghostFin(pts, depth) {
+  const s = new THREE.Shape(); pts.forEach((p, i) => (i ? s.lineTo(p[0], p[1]) : s.moveTo(p[0], p[1])));
+  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false }); g.translate(0, 0, -depth / 2);
+  const m = new THREE.Mesh(g, ghostMat); m.renderOrder = 1; scene.add(m);
+  scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 30), ghostEdge));
+}
+ghostFin([[-3.5, -0.68], [-1.6, -0.68], [-2.0, -2.7], [-3.05, -2.7]], 0.2);
+ghostFin([[5.0, 0.05], [5.55, 0.18], [5.42, -1.75], [5.05, -1.62]], 0.08);
+
+// Agua (fuera del casco)
+const waterMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false,
+  uniforms: { uColor: { value: new THREE.Color() }, uLine: { value: new THREE.Color() }, uA: { value: 0.5 }, uTime: { value: 0 } },
+  vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW = w.xyz; gl_Position = projectionMatrix*viewMatrix*w; }',
+  fragmentShader: `uniform vec3 uColor,uLine; uniform float uA,uTime; varying vec3 vW;
+    float yK(float x){ return -0.7 + max(0.0, x-2.0)*0.25; }
+    float Bw(float x){ if(x < -4.0) return 3.0-(-4.0-x)*0.55; if(x > 1.5) return 3.0-(x-1.5)*0.15; return 3.0; }
+    void main(){
+      float x = vW.x, z = vW.z;
+      if(x > -6.5 && x < 5.6){ float k = yK(x); float c = 1.0 - (1.2-k)/(3.4-k); float s = sqrt(max(0.0,1.0-c*c)); if(abs(z) < Bw(x)*s) discard; }
+      float r = length(vW.xz - vec2(-0.5,0.0));
+      float fade = 1.0 - smoothstep(7.0, 19.0, r);
+      float ln = smoothstep(0.975, 1.0, sin(vW.x*2.4 + sin(vW.z*0.6 + uTime*0.25)*0.9 + uTime*0.4));
+      gl_FragColor = vec4(mix(uColor, uLine, ln*0.7), (uA + ln*0.14)*fade);
+    }`,
+});
+const water = new THREE.Mesh(new THREE.PlaneGeometry(48, 48, 1, 1), waterMat);
+water.rotation.x = -Math.PI / 2; water.position.y = WL; water.renderOrder = 3; scene.add(water);
+
+// Estructura interior: bancadas, suelo, mamparos, bañera fantasma
+const structMats = { sole: new THREE.MeshStandardMaterial({ color: 0x142131, roughness: 0.85 }), bulk: new THREE.MeshStandardMaterial({ color: 0x16263a, roughness: 0.8, transparent: true, opacity: 0.92 }) };
+{
+  const halfAt = (x, y) => { const k = yK(x); const c = 1 - (y - k) / (YS - k); return Bw(x) * Math.sqrt(Math.max(0, 1 - c * c)); };
+  const s = new THREE.Shape(); const xs = []; for (let x = -6.2; x <= -1.95; x += 0.25) xs.push(x);
+  xs.forEach((x, i) => { const w = Math.min(halfAt(x, 0) - 0.05, A_STB > 0 ? 1.7 : 1.7); i ? s.lineTo(x, w) : s.moveTo(x, w); });
+  [...xs].reverse().forEach(x => s.lineTo(x, -(halfAt(x, 0) - 0.05)));
+  const sole = new THREE.Mesh(new THREE.ShapeGeometry(s), structMats.sole); sole.rotation.x = -Math.PI / 2; sole.position.y = -0.005; sole.receiveShadow = true; scene.add(sole);
+  // bancadas del motor
+  [-0.48, 0.48].forEach(z => { const b = new THREE.Mesh(rbox(3.7, 0.8, 0.16, 0.03), structMats.sole); b.position.set(0.25, -0.15, z); b.castShadow = b.receiveShadow = true; scene.add(b); });
+  // mamparo de navegación
+  const bh = new THREE.Mesh(new THREE.BoxGeometry(0.06, 3.2, 2.9), structMats.bulk); bh.position.set(-4.98, 1.6, 0.1); bh.receiveShadow = true; scene.add(bh);
+  const table = new THREE.Mesh(rbox(0.66, 0.05, 1.2, 0.02), structMats.sole); table.position.set(-4.62, 1.19, -0.72); table.castShadow = table.receiveShadow = true; scene.add(table);
+  // tablero técnico del separador
+  const tb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.85, 1.25), structMats.bulk); tb.position.set(-3.1, 1.1, -0.35); tb.receiveShadow = true; scene.add(tb);
+  // estante del waterlock
+  const sh = new THREE.Mesh(rbox(0.7, 0.06, 0.6, 0.02), structMats.sole); sh.position.set(2.08, 0.2, 1.05); sh.receiveShadow = true; scene.add(sh);
+  // bañera fantasma
+  const cb = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(3.5, 0.95, 2.8)), ghostEdge); cb.position.set(3.65, 2.92, 0); scene.add(cb);
+  const cw = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.95), ghostMat); cw.rotation.y = Math.PI / 2; cw.position.set(1.9, 2.92, 0); scene.add(cw);
+}
+
+/* =========================================================================
+   6 · Motor
+   ========================================================================= */
+const COL = { alu: '#c9d1dc', alu2: '#b1bac7', dark: '#29313c', steel: '#8b96a4', bronze: '#b8834f', rubber: '#15181d', bat: '#242a32', lid: '#38404b' };
+ENGINE_IDS.forEach(comp);
+
+// Bloque, cárter, apoyos
+const mBlock = mat('motor', COL.alu, { r: 0.42, m: 0.25 });
+const block = part('motor', rbox(2.0, 1.05, 1.1, 0.07), mBlock, 0, 0.775, 0); block.userData.fade = true; fadeMats.push(mBlock);
+part('motor', rbox(1.75, 0.28, 0.82, 0.05), mat('motor', COL.alu2, { r: 0.5, m: 0.2 }), 0.05, 0.2, 0);
+const mRib = mat('motor', COL.alu2, { r: 0.5, m: 0.2 }); mRib.userData.fadeChild = true; fadeMats.push(mRib);
+[-0.6, 0, 0.6].forEach(x => [-1, 1].forEach(s => { const r = part('motor', new THREE.BoxGeometry(0.06, 0.9, 0.04), mRib, x + 0.3, 0.8, s * 0.565); r.userData.fade = true; }));
+const mFoot = mat('motor', COL.dark, { r: 0.6 });
+[[-0.75, -1], [-0.75, 1], [0.9, -1], [0.9, 1]].forEach(([x, s]) => {
+  part('motor', new THREE.BoxGeometry(0.18, 0.08, 0.22), mFoot, x, 0.32, s * 0.6);
+  part('motor', cylY(0.08, 0.1, 18), mat('motor', COL.rubber, { r: 0.9 }), x, 0.27, s * 0.48);
+});
+part('motor', rbox(0.1, 0.9, 0.9, 0.04), mat('motor', COL.alu2, { r: 0.45, m: 0.25 }), -1.04, 0.78, 0); // tapa de distribución
+
+// Culata + inyectores
+const XI = [-0.6, 0, 0.6];
+part('culata', rbox(1.9, 0.38, 0.95, 0.06), mat('culata', '#d3dae3', { r: 0.4, m: 0.25 }), 0, 1.49, 0);
+const mInj = mat('culata', COL.steel, { r: 0.3, m: 0.85 });
+XI.forEach(x => part('culata', cylY(0.04, 0.24, 14), mInj, x, 1.72, -0.43));
+
+// Tapa de balancines
+const coverTex = tex(512, 160, (g, w, h) => { g.fillStyle = '#29313c'; g.fillRect(0, 0, w, h); g.fillStyle = '#c7d2de'; g.font = FONT(600, 54, 'IBM Plex Sans Condensed'); g.fillText('3 CIL · 0,854 L', 34, 96); g.fillStyle = '#7f8ea0'; g.font = FONT(500, 26, 'IBM Plex Mono'); g.fillText('DIÉSEL MARINO · 21 CV', 36, 136); });
+part('tapa', rbox(1.7, 0.24, 0.72, 0.08), mat('tapa', COL.dark, { r: 0.32, m: 0.45 }), 0, 1.8, 0);
+part('tapa', new THREE.PlaneGeometry(1.0, 0.31), mat('tapa', '#ffffff', { map: coverTex, r: 0.5 }), 0.22, 1.923, 0.02, { rot: [-Math.PI / 2, 0, 0], cast: false });
+part('tapa', cylY(0.07, 0.07, 20), mat('tapa', '#3e4652', { r: 0.4 }), -0.55, 1.95, 0.12);
+
+// Pistones, bielas y cigüeñal
+const cyl = comps.cilindros.group;
+const YC = 0.5, CR = 0.16, LROD = 0.5;
+const PHI = [0, 4 * Math.PI / 3, 2 * Math.PI / 3];
+const PSI = [0, -8 * Math.PI / 3, -4 * Math.PI / 3];
+const crank = new THREE.Group(); crank.position.y = YC; cyl.add(crank);
+const mSteel = mat('cilindros', COL.steel, { r: 0.28, m: 0.9 });
+part('cilindros', cylX(0.055, 2.05, 18), mSteel, 0, 0, 0, { parent: crank });
+XI.forEach((x, i) => {
+  const a = PHI[i];
+  [-0.11, 0.11].forEach(dx => part('cilindros', new THREE.BoxGeometry(0.05, 0.26, 0.16), mSteel, x + dx, Math.cos(a) * CR / 2, Math.sin(a) * CR / 2, { parent: crank, rot: [a, 0, 0] }));
+  part('cilindros', cylX(0.05, 0.22, 16), mSteel, x, Math.cos(a) * CR, Math.sin(a) * CR, { parent: crank });
+});
+const mPiston = mat('cilindros', '#e3e8ee', { r: 0.3, m: 0.7 });
+const mRod = mat('cilindros', '#9aa5b3', { r: 0.3, m: 0.8 });
+const mBore = mat('cilindros', '#7f93ab', { t: true, o: 0.14, side: THREE.DoubleSide });
+const pistons = [], rods = [];
+XI.forEach(x => {
+  pistons.push(part('cilindros', cylY(0.19, 0.2, 28), mPiston, x, 1.0, 0));
+  rods.push(part('cilindros', new THREE.BoxGeometry(0.07, LROD, 0.05), mRod, x, 0.8, 0));
+  part('cilindros', new THREE.CylinderGeometry(0.205, 0.205, 0.78, 28, 1, true), mBore, x, 0.9, 0, { pick: false, cast: false });
+});
+// destellos de combustión
+const flashTex = tex(128, 128, (g, w) => { const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,200,140,.9)'); gr.addColorStop(1, 'rgba(255,90,40,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+const flashes = XI.map(x => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTex, color: 0xff8a5c, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 })); s.position.set(x, 1.2, 0); s.scale.setScalar(0.01); s.renderOrder = 12; cyl.add(s); return s; });
+
+// Volante
+const mHousing = mat('volante', COL.alu, { r: 0.42, m: 0.25 }); fadeMats.push(mHousing);
+const housing = part('volante', cylX(0.55, 0.26, 40), mHousing, 1.13, 0.6, 0); housing.userData.fade = true;
+const flywheel = new THREE.Group(); flywheel.position.set(1.13, 0.6, 0); comps.volante.group.add(flywheel);
+part('volante', cylX(0.46, 0.08, 40), mat('volante', '#9aa5b3', { r: 0.3, m: 0.85 }), 0, 0, 0, { parent: flywheel });
+for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; part('volante', new THREE.BoxGeometry(0.1, 0.1, 0.1), mat('volante', '#5d6876', { m: 0.8, r: 0.3 }), 0.02, Math.cos(a) * 0.36, Math.sin(a) * 0.36, { parent: flywheel }); }
+
+// Inversora
+part('inversora', rbox(0.55, 0.62, 0.62, 0.06), mat('inversora', '#aeb7c4', { r: 0.4, m: 0.3 }), 1.53, 0.6, 0);
+part('inversora', cylX(0.12, 0.1, 24), mat('inversora', COL.steel, { r: 0.3, m: 0.85 }), 1.85, 0.42, 0);
+const gearLever = new THREE.Group(); gearLever.position.set(1.55, 0.92, 0.2); comps.inversora.group.add(gearLever);
+part('inversora', new THREE.BoxGeometry(0.03, 0.22, 0.03), mat('inversora', COL.dark, { r: 0.4 }), 0, 0.1, 0, { parent: gearLever });
+
+// Frontal: poleas, correa, alternador
+const mPul = mat('alternador', '#5b6676', { r: 0.35, m: 0.75 });
+function pulley(y, z, r) {
+  const g = new THREE.Group(); g.position.set(-1.32, y, z); comps.alternador.group.add(g);
+  part('alternador', cylX(r, 0.07, 32), mPul, 0, 0, 0, { parent: g });
+  for (let i = 0; i < 3; i++) { const a = i / 3 * TAU; part('alternador', new THREE.BoxGeometry(0.02, r * 0.9, 0.035), mat('alternador', '#c9d1dc', { r: 0.4 }), -0.04, Math.cos(a) * r * 0.45, Math.sin(a) * r * 0.45, { parent: g, rot: [a, 0, 0] }); }
+  return g;
+}
+const pCrank = pulley(0.5, 0, 0.19), pPump = pulley(1.12, -0.05, 0.13), pAlt = pulley(1.55, 0.6, 0.1);
+{
+  const P = [{ c: [0.5, 0], r: 0.2 }, { c: [1.12, -0.05], r: 0.14 }, { c: [1.55, 0.6], r: 0.11 }];
+  const cy = (P[0].c[0] + P[1].c[0] + P[2].c[0]) / 3, cz = (P[0].c[1] + P[1].c[1] + P[2].c[1]) / 3;
+  P.forEach(p => (p.ang = Math.atan2(p.c[1] - cz, p.c[0] - cy)));
+  P.sort((a, b) => a.ang - b.ang);
+  const pts = [];
+  P.forEach(p => { for (let k = -2; k <= 2; k++) { const a = p.ang + k * 0.5; pts.push(V3(-1.32, p.c[0] + p.r * Math.cos(a), p.c[1] + p.r * Math.sin(a))); } });
+  part('alternador', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'centripetal'), 120, 0.022, 8, true), mat('alternador', COL.rubber, { r: 0.85 }), 0, 0, 0);
+}
+part('alternador', cylX(0.25, 0.34, 32), mat('alternador', '#d6dce4', { r: 0.35, m: 0.55 }), -1.12, 1.55, 0.6);
+const altFan = new THREE.Group(); altFan.position.set(-1.27, 1.55, 0.6); comps.alternador.group.add(altFan);
+for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; part('alternador', new THREE.BoxGeometry(0.03, 0.15, 0.03), mat('alternador', '#8f9aa8', { m: 0.8, r: 0.3 }), 0, Math.cos(a) * 0.15, Math.sin(a) * 0.15, { parent: altFan, rot: [a, 0, 0] }); }
+part('alternador', cylY(0.025, 0.08, 10), mat('alternador', '#c0392b', { r: 0.5 }), -1.1, 1.82, 0.68); // terminal B+
+
+// Bomba de agua de mar
+part('bomba_mar', cylX(0.13, 0.18, 26), mat('bomba_mar', COL.bronze, { r: 0.35, m: 0.85 }), -1.2, 0.85, 0.5);
+part('bomba_mar', cylX(0.1, 0.04, 26), mat('bomba_mar', '#d4a06a', { r: 0.3, m: 0.9 }), -1.31, 0.85, 0.5);
+
+// Admisión
+part('admision', rbox(1.4, 0.18, 0.16, 0.04), mat('admision', COL.alu2, { r: 0.45 }), 0, 1.35, -0.6);
+part('admision', cylX(0.17, 0.45, 28), mat('admision', '#39424e', { r: 0.55, m: 0.2 }), -0.55, 1.45, -0.82);
+
+// Bomba de inyección
+part('inyeccion', rbox(0.66, 0.28, 0.2, 0.04), mat('inyeccion', '#a7b1be', { r: 0.4, m: 0.4 }), 0.05, 0.95, -0.66);
+part('inyeccion', rbox(0.22, 0.2, 0.18, 0.03), mat('inyeccion', COL.dark, { r: 0.4 }), -0.42, 0.98, -0.66);
+
+// Colector de escape
+const mExh = mat('colector', '#6d6058', { r: 0.6, m: 0.5 });
+part('colector', rbox(1.5, 0.2, 0.2, 0.05), mExh, 0.05, 1.45, 0.62);
+XI.forEach(x => part('colector', new THREE.BoxGeometry(0.16, 0.14, 0.14), mExh, x, 1.45, 0.52));
+
+// Intercambiador + depósito de expansión
+part('intercambiador', cylX(0.16, 1.3, 32), mat('intercambiador', '#c7ced8', { r: 0.3, m: 0.6 }), -0.15, 2.12, 0.28);
+[-0.82, 0.52].forEach(x => part('intercambiador', cylX(0.17, 0.05, 32), mat('intercambiador', COL.bronze, { r: 0.35, m: 0.85 }), x, 2.12, 0.28));
+part('intercambiador', cylY(0.06, 0.16, 18), mat('intercambiador', '#c7ced8', { r: 0.3, m: 0.6 }), -0.62, 2.32, 0.28);
+part('intercambiador', cylY(0.08, 0.04, 18), mat('intercambiador', '#2f3742', { r: 0.4 }), -0.62, 2.42, 0.28);
+[-0.6, 0.3].forEach(x => part('intercambiador', new THREE.BoxGeometry(0.06, 0.12, 0.1), mat('intercambiador', COL.dark, { r: 0.5 }), x, 1.96, 0.28));
+
+// Codo mezclador
+part('codo', new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0.82, 1.47, 0.62), V3(0.92, 1.8, 0.64), V3(1.0, 2.0, 0.66), V3(1.25, 2.04, 0.72), V3(1.5, 1.75, 0.82)]), 40, 0.075, 12), mat('codo', '#8d7f74', { r: 0.45, m: 0.7 }), 0, 0, 0);
+
+// Motor de arranque
+const mStarter = mat('arranque', '#3a4350', { r: 0.4, m: 0.55 });
+part('arranque', cylX(0.15, 0.5, 28), mStarter, 0.72, 0.52, 0.74);
+part('arranque', cylX(0.09, 0.18, 20), mat('arranque', COL.steel, { r: 0.3, m: 0.85 }), 1.02, 0.52, 0.74);
+part('arranque', cylX(0.075, 0.32, 20), mat('arranque', '#596474', { r: 0.4, m: 0.5 }), 0.74, 0.72, 0.74);
+const armature = new THREE.Group(); armature.position.set(0.72, 0.52, 0.74); comps.arranque.group.add(armature);
+const mArm = mat('arranque', '#9fb3c8', { r: 0.35, m: 0.7 });
+for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; part('arranque', new THREE.BoxGeometry(0.46, 0.022, 0.03), mArm, 0, Math.cos(a) * 0.152, Math.sin(a) * 0.152, { parent: armature, rot: [a, 0, 0] }); }
+
+// Eje, bocina y hélice
+const SH0 = V3(1.9, 0.42, 0), SH1 = V3(4.62, -0.47, 0);
+const shDir = SH1.clone().sub(SH0).normalize(), shLen = SH1.distanceTo(SH0);
+const shQ = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), shDir);
+comp('eje'); comp('helice');
+const shaft = new THREE.Group(); shaft.position.copy(SH0.clone().add(SH1).multiplyScalar(0.5)); shaft.quaternion.copy(shQ); comps.eje.group.add(shaft);
+const shaftSpin = new THREE.Group(); shaft.add(shaftSpin);
+part('eje', cylY(0.045, shLen, 18), mat('eje', '#aab6c4', { r: 0.25, m: 0.95 }), 0, 0, 0, { parent: shaftSpin });
+for (let i = 0; i < 9; i++) part('eje', new THREE.BoxGeometry(0.02, 0.08, 0.095), mat('eje', '#5a6574', { r: 0.4, m: 0.6 }), 0, -shLen / 2 + 0.2 + i * (shLen - 0.4) / 8, 0, { parent: shaftSpin });
+{ const sg = new THREE.Group(); sg.position.copy(SH0.clone().addScaledVector(shDir, 1.72)); sg.quaternion.copy(shQ); comps.eje.group.add(sg); part('eje', cylY(0.085, 0.3, 20), mat('eje', COL.bronze, { r: 0.35, m: 0.85 }), 0, 0, 0, { parent: sg }); }
+const prop = new THREE.Group(); prop.position.copy(SH1.clone().addScaledVector(shDir, 0.08)); prop.quaternion.copy(shQ); comps.helice.group.add(prop);
+const propSpin = new THREE.Group(); prop.add(propSpin);
+const mProp = mat('helice', COL.bronze, { r: 0.3, m: 0.95 });
+part('helice', new THREE.ConeGeometry(0.075, 0.24, 20), mProp, 0, 0.1, 0, { parent: propSpin });
+part('helice', cylY(0.075, 0.12, 20), mProp, 0, -0.06, 0, { parent: propSpin });
+for (let k = 0; k < 3; k++) {
+  const pv = new THREE.Group(); pv.rotation.y = k / 3 * TAU; propSpin.add(pv);
+  part('helice', new THREE.SphereGeometry(1, 20, 10), mProp, 0.25, -0.02, 0, { parent: pv, scale: [0.22, 0.025, 0.12], rot: [0.62, 0, 0] });
+}
+
+/* =========================================================================
+   7 · Combustible, baterías, consumos, refrigeración, escape
+   ========================================================================= */
+['deposito', 'filtro_gasoil', 'bat_arranque', 'bat_servicio', 'vsr', 'cuadro_dc', 'vhf', 'instrumentos', 'luz', 'inversor', 'toma_ac', 'portatil', 'panel', 'toma_mar', 'filtro_mar', 'waterlock', 'salida'].forEach(comp);
+
+// Depósito de gasóil (con nivel visible)
+part('deposito', rbox(1.3, 0.85, 0.8, 0.08), mat('deposito', '#b8c4cf', { t: true, o: 0.32, r: 0.25, m: 0.6 }), 3.1, 0.95, -1.25, { cast: false });
+const mFuelIn = mat('deposito', '#e7a33b', { t: true, o: 0.78, r: 0.3, e: '#b46a10', ei: 0.35 });
+part('deposito', rbox(1.2, 0.5, 0.7, 0.05), mFuelIn, 3.1, 0.79, -1.25, { cast: false });
+part('deposito', new THREE.PlaneGeometry(0.62, 0.2), mat('deposito', '#ffffff', { map: plate('GASÓIL', null, '#f5a524', 512, 160), r: 0.6 }), 3.0, 1.15, -0.845, { cast: false });
+part('deposito', cylY(0.05, 0.12, 14), mat('deposito', COL.steel, { m: 0.8, r: 0.3 }), 3.55, 1.43, -1.25);
+
+// Prefiltro separador
+part('filtro_gasoil', rbox(0.22, 0.12, 0.2, 0.03), mat('filtro_gasoil', '#3a434f', { r: 0.4, m: 0.4 }), 2.0, 1.5, -1.0);
+part('filtro_gasoil', cylY(0.085, 0.32, 24), mat('filtro_gasoil', '#dfe9f2', { t: true, o: 0.28, r: 0.1 }), 2.0, 1.28, -1.0, { cast: false });
+part('filtro_gasoil', cylY(0.072, 0.2, 24), mat('filtro_gasoil', '#e7a33b', { t: true, o: 0.75, e: '#b46a10', ei: 0.3 }), 2.0, 1.33, -1.0, { cast: false });
+part('filtro_gasoil', cylY(0.072, 0.05, 24), mat('filtro_gasoil', '#9fb8cc', { t: true, o: 0.7 }), 2.0, 1.17, -1.0, { cast: false });
+
+// Baterías
+function battery(cid, x, z, name, accent, top = false) {
+  part(cid, rbox(0.7, 0.5, 0.44, 0.03), mat(cid, COL.bat, { r: 0.6 }), x, 0.25, z);
+  part(cid, rbox(0.7, 0.05, 0.44, 0.02), mat(cid, COL.lid, { r: 0.5 }), x, 0.525, z);
+  part(cid, cylY(0.035, 0.06, 14), mat(cid, '#b0413a', { r: 0.4, m: 0.6 }), x + 0.22, 0.58, z - 0.05);
+  part(cid, cylY(0.035, 0.06, 14), mat(cid, '#2c3138', { r: 0.4, m: 0.6 }), x - 0.22, 0.58, z - 0.05);
+  if (top) part(cid, new THREE.PlaneGeometry(0.34, 0.17), mat(cid, '#ffffff', { map: plate(name, '12 V', accent, 512, 256), r: 0.6 }), x, 0.553, z + 0.08, { rot: [-Math.PI / 2, 0, 0], cast: false });
+}
+battery('bat_arranque', -2.5, -1.0, 'ARRANQUE', '#4fc3f7', true);
+battery('bat_servicio', -2.5, 0.22, 'SERVICIO', '#4fc3f7', false);
+battery('bat_servicio', -2.5, 0.72, 'SERVICIO', '#4fc3f7', true);
+part('bat_servicio', new THREE.BoxGeometry(0.04, 0.03, 0.5), mat('bat_servicio', '#b0413a', { r: 0.4, m: 0.6 }), -2.28, 0.6, 0.47);
+
+// Separador (VSR)
+part('vsr', rbox(0.12, 0.24, 0.38, 0.03), mat('vsr', '#2b323c', { r: 0.45 }), -3.02, 1.12, -0.35);
+const mTerm = mat('vsr', '#c79b5a', { m: 0.9, r: 0.3 });
+part('vsr', cylX(0.03, 0.05, 12), mTerm, -2.94, 1.12, -0.48);
+part('vsr', cylX(0.03, 0.05, 12), mTerm, -2.94, 1.12, -0.22);
+const vsrBar = new THREE.Group(); vsrBar.position.set(-2.92, 1.12, -0.48); comps.vsr.group.add(vsrBar);
+const mVsrBar = mat('vsr', '#e6edf5', { m: 0.8, r: 0.25 });
+part('vsr', new THREE.BoxGeometry(0.02, 0.03, 0.26), mVsrBar, 0, 0, 0.13, { parent: vsrBar });
+const mLed = mat('vsr', '#1d2a36', { r: 0.3 });
+part('vsr', new THREE.SphereGeometry(0.022, 12, 8), mLed, -2.955, 1.21, -0.35);
+
+// Panel de mando (bañera)
+const tachTex = tex(256, 256, (g, w) => {
+  g.fillStyle = '#0d141d'; g.beginPath(); g.arc(128, 128, 126, 0, TAU); g.fill();
+  g.strokeStyle = '#d8e2ec'; g.fillStyle = '#d8e2ec'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (let v = 0; v <= 40; v++) { const a = (225 - 270 * v / 40) * Math.PI / 180; const r0 = v % 5 ? 100 : 90; g.lineWidth = v % 5 ? 2 : 4; g.beginPath(); g.moveTo(128 + Math.cos(a) * r0, 128 - Math.sin(a) * r0); g.lineTo(128 + Math.cos(a) * 112, 128 - Math.sin(a) * 112); g.stroke(); if (v % 10 === 0) { g.font = FONT(500, 22, 'IBM Plex Mono'); g.fillText(String(v / 10), 128 + Math.cos(a) * 70, 128 - Math.sin(a) * 70); } }
+  g.fillStyle = '#7f90a2'; g.font = FONT(500, 15, 'IBM Plex Mono'); g.fillText('×1000 rpm', 128, 182);
+});
+part('panel', rbox(0.04, 0.44, 0.62, 0.02), mat('panel', '#1b222b', { r: 0.4, m: 0.3 }), 1.93, 2.95, 0.9);
+part('panel', new THREE.CircleGeometry(0.15, 48), mat('panel', '#ffffff', { map: tachTex, r: 0.4 }), 1.953, 3.0, 0.8, { rot: [0, Math.PI / 2, 0], cast: false });
+const needle = new THREE.Group(); needle.position.set(1.956, 3.0, 0.8); needle.rotation.y = Math.PI / 2; comps.panel.group.add(needle);
+const needlePivot = new THREE.Group(); needle.add(needlePivot);
+part('panel', new THREE.BoxGeometry(0.008, 0.11, 0.004), mat('panel', '#ff8a5c', { e: '#ff6b4a', ei: 0.8 }), 0, 0.05, 0, { parent: needlePivot, cast: false });
+const keyG = new THREE.Group(); keyG.position.set(1.97, 2.86, 1.08); comps.panel.group.add(keyG);
+part('panel', cylX(0.035, 0.03, 18), mat('panel', '#9aa5b3', { m: 0.85, r: 0.3 }), -0.01, 0, 0, { parent: keyG });
+part('panel', new THREE.BoxGeometry(0.04, 0.09, 0.02), mat('panel', '#c7ced8', { m: 0.8, r: 0.3 }), 0.02, 0, 0, { parent: keyG });
+const mLampOil = mat('panel', '#3a2a1a', { r: 0.4 }), mLampChg = mat('panel', '#3a1c1a', { r: 0.4 });
+part('panel', new THREE.SphereGeometry(0.022, 12, 8), mLampOil, 1.95, 2.82, 0.7);
+part('panel', new THREE.SphereGeometry(0.022, 12, 8), mLampChg, 1.95, 2.82, 0.79);
+
+// Cuadro DC y consumos (mamparo de navegación)
+const dcTex = tex(256, 256, (g, w) => {
+  g.fillStyle = '#151c25'; g.fillRect(0, 0, w, w); g.fillStyle = '#9fb0c2'; g.font = FONT(600, 22, 'IBM Plex Sans Condensed'); g.fillText('CUADRO DC 12 V', 20, 34);
+  ['LUCES', 'VHF', 'INSTRUM.', 'BOMBAS', 'NAVEG.'].forEach((t, i) => { const y = 66 + i * 38; g.fillStyle = '#2a3542'; g.fillRect(20, y, 44, 26); g.fillStyle = '#d8e2ec'; g.fillRect(36, y + 4, 12, 18); g.fillStyle = '#c1cdd9'; g.font = FONT(500, 18, 'IBM Plex Mono'); g.fillText(t, 80, y + 19); });
+});
+part('cuadro_dc', rbox(0.04, 0.55, 0.55, 0.02), mat('cuadro_dc', '#1b222b', { r: 0.45 }), -4.93, 1.75, 1.0);
+part('cuadro_dc', new THREE.PlaneGeometry(0.5, 0.5), mat('cuadro_dc', '#ffffff', { map: dcTex, r: 0.5 }), -4.905, 1.75, 1.0, { rot: [0, Math.PI / 2, 0], cast: false });
+
+const vhfTex = screen([['CH 16', 52, 78, '#e8f6ff', 'IBM Plex Mono', 600], ['25 W · DUAL', 20, 122, '#8ec9e8']]);
+part('vhf', rbox(0.2, 0.17, 0.36, 0.02), mat('vhf', '#20262e', { r: 0.45 }), -4.85, 2.15, 0.42);
+const mVhfScr = mat('vhf', '#0a1420', { map: vhfTex, emap: vhfTex, r: 0.3 });
+part('vhf', new THREE.PlaneGeometry(0.2, 0.11), mVhfScr, -4.748, 2.17, 0.47, { rot: [0, Math.PI / 2, 0], cast: false });
+power(mVhfScr, '#ffffff', () => S.loads);
+
+const instTex = tex(256, 256, (g) => { g.fillStyle = '#08131f'; g.beginPath(); g.arc(128, 128, 126, 0, TAU); g.fill(); g.fillStyle = '#e8f6ff'; g.textAlign = 'center'; g.font = FONT(600, 76, 'IBM Plex Mono'); g.fillText('5,8', 128, 140); g.fillStyle = '#8ec9e8'; g.font = FONT(500, 22, 'IBM Plex Mono'); g.fillText('NUDOS', 128, 182); });
+part('instrumentos', cylX(0.17, 0.05, 40), mat('instrumentos', '#20262e', { r: 0.4 }), -4.93, 2.2, -0.08);
+const mInst = mat('instrumentos', '#0a1420', { map: instTex, emap: instTex, r: 0.3 });
+part('instrumentos', new THREE.CircleGeometry(0.15, 40), mInst, -4.903, 2.2, -0.08, { rot: [0, Math.PI / 2, 0], cast: false });
+power(mInst, '#ffffff', () => S.loads);
+
+part('luz', new THREE.CylinderGeometry(0.03, 0.03, 0.18, 10), mat('luz', '#3a434f', { r: 0.4 }), -4.88, 2.95, -0.55, { rot: [0, 0, Math.PI / 2] });
+const mLamp = mat('luz', '#fff1d6', { r: 0.3, e: '#000000' });
+part('luz', new THREE.SphereGeometry(0.11, 24, 12, 0, TAU, 0, Math.PI / 2), mLamp, -4.78, 2.86, -0.55, { rot: [Math.PI, 0, 0] });
+power(mLamp, '#ffd59a', () => S.loads * 1.6);
+
+// Inversor, toma y portátil
+const invTex = plate('INVERSOR', '12 V DC → 230 V AC', '#d98bff', 512, 220);
+part('inversor', rbox(0.52, 0.3, 0.5, 0.03), mat('inversor', '#2b313b', { r: 0.5, m: 0.3 }), -4.12, 0.2, -0.45);
+for (let i = 0; i < 6; i++) part('inversor', new THREE.BoxGeometry(0.5, 0.02, 0.01), mat('inversor', '#3c4450', { r: 0.6 }), -4.12, 0.12 + i * 0.03, -0.205);
+part('inversor', new THREE.PlaneGeometry(0.42, 0.18), mat('inversor', '#ffffff', { map: invTex, r: 0.6 }), -4.12, 0.352, -0.47, { rot: [-Math.PI / 2, 0, 0], cast: false });
+const mInvLed = mat('inversor', '#2a2030', { r: 0.3 });
+part('inversor', new THREE.SphereGeometry(0.018, 10, 8), mInvLed, -3.86, 0.3, -0.62);
+power(mInvLed, '#d98bff', () => S.inv * 2.0);
+
+part('toma_ac', rbox(0.03, 0.14, 0.12, 0.015), mat('toma_ac', '#e7ebf0', { r: 0.5 }), -4.94, 1.38, -0.92);
+[-0.025, 0.025].forEach(dz => part('toma_ac', cylX(0.01, 0.02, 8), mat('toma_ac', '#20262e', { r: 0.6 }), -4.924, 1.38, -0.92 + dz));
+
+const lapTex = tex(256, 160, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#1b2440'); gr.addColorStop(1, '#3a1e4d'); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.fillStyle = '#e9ddff'; g.font = FONT(600, 26, 'IBM Plex Sans'); g.fillText('Cargando', 24, 70); g.fillStyle = '#c9b4ea'; g.font = FONT(500, 18, 'IBM Plex Mono'); g.fillText('230 V · 65 W', 24, 104); g.fillStyle = '#d98bff'; g.fillRect(24, 122, 150, 8); g.fillStyle = 'rgba(255,255,255,.2)'; g.fillRect(174, 122, 56, 8); });
+part('portatil', rbox(0.3, 0.02, 0.42, 0.01), mat('portatil', '#9aa3ae', { r: 0.35, m: 0.6 }), -4.55, 1.225, -0.72);
+part('portatil', rbox(0.015, 0.28, 0.42, 0.008), mat('portatil', '#8c95a0', { r: 0.35, m: 0.6 }), -4.72, 1.36, -0.72, { rot: [0, 0, 0.22] });
+const mLapScr = mat('portatil', '#05070a', { map: lapTex, emap: lapTex, r: 0.2 });
+part('portatil', new THREE.PlaneGeometry(0.38, 0.24), mLapScr, -4.711, 1.362, -0.72, { rot: [0, Math.PI / 2, 0.22], order: 'ZYX', cast: false });
+power(mLapScr, '#ffffff', () => S.ac * 1.1);
+
+// Toma de mar y filtro de agua
+part('toma_mar', cylY(0.11, 0.04, 20), mat('toma_mar', COL.bronze, { r: 0.35, m: 0.85 }), -1.5, -0.5, 0.9);
+part('toma_mar', new THREE.SphereGeometry(0.09, 18, 12), mat('toma_mar', COL.bronze, { r: 0.35, m: 0.85 }), -1.5, -0.4, 0.9);
+part('toma_mar', new THREE.BoxGeometry(0.3, 0.03, 0.04), mat('toma_mar', '#c0392b', { r: 0.5 }), -1.38, -0.33, 0.9, { rot: [0, 0, 0.15] });
+part('filtro_mar', cylY(0.115, 0.07, 24), mat('filtro_mar', COL.bronze, { r: 0.35, m: 0.85 }), -1.75, 0.66, 1.05);
+part('filtro_mar', cylY(0.1, 0.4, 24), mat('filtro_mar', '#dfe9f2', { t: true, o: 0.25, r: 0.1 }), -1.75, 0.42, 1.05, { cast: false });
+const mSeaIn = mat('filtro_mar', '#2ed3b7', { t: true, o: 0.45, e: '#0c6f61', ei: 0.4 });
+part('filtro_mar', cylY(0.088, 0.34, 24), mSeaIn, -1.75, 0.4, 1.05, { cast: false });
+part('filtro_mar', cylY(0.105, 0.05, 24), mat('filtro_mar', COL.bronze, { r: 0.35, m: 0.85 }), -1.75, 0.2, 1.05);
+
+// Waterlock y salida
+part('waterlock', rbox(0.5, 0.5, 0.42, 0.08), mat('waterlock', '#1c2129', { r: 0.7 }), 2.08, 0.48, 1.05);
+part('salida', new THREE.TorusGeometry(0.09, 0.025, 10, 24), mat('salida', COL.bronze, { r: 0.35, m: 0.85 }), 5.6, 1.55, 0.85, { rot: [0, Math.PI / 2, 0] });
+
+/* =========================================================================
+   8 · Flujos (tubos + pulsos luminosos)
+   ========================================================================= */
+const uTime = { value: 0 };
+const FLOW_VS = 'varying vec2 vUv; varying float vF; void main(){ vUv = uv; vec4 mv = modelViewMatrix*vec4(position,1.0); vec3 n = normalize(normalMatrix*normal); vF = abs(dot(n, normalize(-mv.xyz))); gl_Position = projectionMatrix*mv; }';
+const FLOW_FS = `uniform vec3 uColor; uniform float uI,uOff,uSpacing,uLen,uPhase,uBoost,uClosed,uBase; varying vec2 vUv; varying float vF;
+  void main(){
+    float s = vUv.x*uLen;
+    float g = fract((s - uOff)/uSpacing + uPhase);
+    float head = smoothstep(0.78,0.96,g)*(1.0-smoothstep(0.96,1.0,g));
+    float tail = pow(g,5.0)*0.75;
+    float p = max(head*1.25, tail);
+    float ends = mix(smoothstep(0.0,0.02,vUv.x)*smoothstep(1.0,0.98,vUv.x), 1.0, uClosed);
+    float core = 0.35 + 0.65*pow(vF,1.4);
+    float a = clamp((uBase + p)*core*uI*ends, 0.0, 1.0);
+    gl_FragColor = vec4(uColor*(0.55 + p*uBoost), a);
+  }`;
+const flows = {}, flowList = [];
+function flow(id, system, pts, o = {}) {
+  const closed = !!o.closed;
+  const curve = new THREE.CatmullRomCurve3(pts.map(p => V3(p[0], p[1], p[2])), closed, 'centripetal');
+  const len = curve.getLength(), seg = Math.max(40, Math.round(len * 30)), r = o.r ?? 0.035;
+  let pipe = null;
+  if (o.pipe !== false) {
+    const pm = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: o.pr ?? 0.55, metalness: o.pm ?? 0.1, transparent: true, opacity: 1 });
+    pipe = new THREE.Mesh(new THREE.TubeGeometry(curve, seg, r, 10, closed), pm); pipe.castShadow = true; pipe.receiveShadow = true; pipe.renderOrder = 4; scene.add(pipe);
+  }
+  const gm = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color() }, uI: { value: 0 }, uOff: { value: 0 }, uSpacing: { value: o.spacing ?? 0.6 }, uLen: { value: len }, uPhase: { value: o.phase ?? 0 }, uBoost: { value: 2.0 }, uClosed: { value: closed ? 1 : 0 }, uBase: { value: o.base ?? 0.14 } },
+    vertexShader: FLOW_VS, fragmentShader: FLOW_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const glow = new THREE.Mesh(new THREE.TubeGeometry(curve, seg, r * (o.gr ?? 1.35), 10, closed), gm);
+  glow.renderOrder = 10; glow.visible = false; scene.add(glow);
+  const f = { id, system, pipe, glow, gm, int: 0, off: Math.random() * 4, speed: o.speed ?? 0.9, engine: !!o.engine, tint: o.tint ?? 0.4, pipeColor: o.pipeColor, phys: o.phys };
+  flows[id] = f; flowList.push(f); return f;
+}
+
+// Combustible
+flow('fuel_main', 'fuel', [[2.62, 1.38, -1.25], [2.42, 1.62, -1.15], [2.12, 1.55, -1.0], [2.0, 1.54, -1.0], [1.86, 1.5, -0.97], [1.3, 1.28, -0.88], [0.62, 1.04, -0.8], [0.38, 0.98, -0.74]], { r: 0.028, engine: true, speed: 0.7 });
+XI.forEach((x, i) => flow('fuel_inj' + i, 'fuel', [[0.05 + x * 0.35, 1.08, -0.68], [x, 1.32, -0.76], [x, 1.55, -0.68], [x, 1.84, -0.43]], { r: 0.016, engine: true, speed: 0.8, spacing: 0.35, tint: 0.2, pipeColor: '#8b96a4', pm: 0.8, pr: 0.3 }));
+
+// Eléctrico DC
+flow('dc_start', 'dc', [[-2.28, 0.6, -1.05], [-2.0, 0.4, -0.9], [-1.55, 0.1, -0.3], [-1.1, 0.07, 0.72], [-0.2, 0.14, 0.88], [0.45, 0.32, 0.92], [0.7, 0.6, 0.88], [0.74, 0.86, 0.78]], { r: 0.042, speed: 2.4, spacing: 0.45, tint: 0.28 });
+flow('dc_signal', 'dc', [[1.9, 2.82, 0.95], [1.78, 2.4, 0.98], [1.35, 1.6, 1.02], [0.95, 1.05, 0.9], [0.76, 0.86, 0.78]], { r: 0.014, speed: 1.4, spacing: 0.3, tint: 0.3 });
+flow('dc_alt', 'dc', [[-1.1, 1.86, 0.68], [-1.6, 1.78, 0.55], [-2.1, 1.25, -0.3], [-2.28, 0.82, -0.9], [-2.28, 0.6, -0.98]], { r: 0.03, speed: 1.2, tint: 0.28 });
+flow('dc_vsr_a', 'dc', [[-2.28, 0.6, -0.92], [-2.62, 0.82, -0.78], [-2.9, 1.1, -0.52]], { r: 0.03, speed: 1.0, spacing: 0.35, tint: 0.28 });
+flow('dc_vsr_b', 'dc', [[-2.9, 1.1, -0.18], [-2.62, 0.82, 0.02], [-2.28, 0.6, 0.15]], { r: 0.03, speed: 1.0, spacing: 0.35, tint: 0.28 });
+flow('dc_house', 'dc', [[-2.28, 0.6, 0.78], [-3.0, 0.62, 1.12], [-4.0, 1.05, 1.25], [-4.88, 1.48, 1.08]], { r: 0.028, speed: 0.8, tint: 0.28 });
+flow('load_vhf', 'dc', [[-4.88, 1.82, 0.78], [-4.9, 2.0, 0.6], [-4.88, 2.12, 0.5]], { r: 0.012, speed: 0.6, spacing: 0.25, tint: 0.3 });
+flow('load_inst', 'dc', [[-4.88, 1.9, 0.76], [-4.91, 2.42, 0.42], [-4.9, 2.36, 0.06], [-4.9, 2.25, -0.04]], { r: 0.012, speed: 0.6, spacing: 0.25, tint: 0.3 });
+flow('load_light', 'dc', [[-4.88, 1.96, 0.74], [-4.91, 2.85, 0.45], [-4.91, 2.95, -0.3], [-4.88, 2.95, -0.48]], { r: 0.012, speed: 0.6, spacing: 0.25, tint: 0.3 });
+flow('dc_inv', 'dc', [[-2.28, 0.6, 0.3], [-2.9, 0.3, 0.1], [-3.6, 0.28, -0.3], [-3.86, 0.3, -0.42]], { r: 0.045, speed: 1.5, spacing: 0.45, tint: 0.28 });
+// AC
+flow('ac_out', 'ac', [[-4.38, 0.3, -0.62], [-4.72, 0.42, -0.82], [-4.9, 0.95, -0.9], [-4.92, 1.34, -0.9], [-4.86, 1.33, -0.88], [-4.78, 1.26, -0.82], [-4.62, 1.25, -0.74]], { r: 0.022, speed: 0.9, spacing: 0.32, tint: 0.3 });
+
+// Agua de mar → intercambiador → codo
+flow('sea_main', 'sea', [[-1.5, -0.36, 0.9], [-1.62, -0.05, 1.0], [-1.75, 0.18, 1.05], [-1.75, 0.6, 1.05], [-1.58, 0.82, 0.85], [-1.32, 0.86, 0.56], [-1.22, 0.98, 0.42], [-1.52, 1.35, 0.5], [-1.36, 1.95, 0.4], [-0.86, 2.14, 0.28], [0.5, 2.14, 0.28], [0.76, 2.2, 0.45], [0.96, 2.03, 0.64]], { r: 0.034, engine: true, speed: 0.9, tint: 0.3 });
+// Agua dulce (circuito cerrado)
+flow('fresh_loop', 'fresh', [[-0.75, 2.0, 0.2], [-1.0, 1.65, 0.05], [-1.15, 1.18, -0.06], [-0.9, 1.0, 0.585], [0.0, 1.05, 0.585], [0.62, 1.1, 0.585], [0.72, 1.62, 0.45], [0.45, 2.0, 0.22]], { r: 0.026, closed: true, engine: true, speed: 0.7, tint: 0.3 });
+// Escape: gases y escape húmedo
+flow('exh_gas', 'exh', [[-0.65, 1.47, 0.62], [0.3, 1.47, 0.62], [0.82, 1.48, 0.63], [0.93, 1.8, 0.65], [1.0, 2.0, 0.66]], { pipe: false, r: 0.07, gr: 1.15, engine: true, speed: 1.1, spacing: 0.45 });
+const WET = [[1.0, 2.0, 0.66], [1.25, 2.04, 0.72], [1.5, 1.75, 0.82], [1.8, 1.2, 0.95], [2.0, 0.95, 1.05], [2.05, 0.62, 1.05], [2.15, 0.95, 1.05], [2.6, 1.6, 1.08], [3.1, 2.2, 1.08], [3.5, 2.3, 1.05], [3.9, 2.05, 1.0], [4.6, 1.72, 0.9], [5.62, 1.55, 0.85]];
+flow('exh_wet_g', 'exh', WET, { r: 0.072, gr: 1.08, engine: true, speed: 1.2, spacing: 0.7, pipeColor: '#1a1e25', tint: 0.08 });
+flow('exh_wet_w', 'sea', WET, { pipe: false, r: 0.072, gr: 1.18, engine: true, speed: 1.2, spacing: 0.7, phase: 0.5 });
+// Transmisión
+flow('mech_shaft', 'mech', [[SH0.x, SH0.y, 0], [SH1.x, SH1.y, 0]], { pipe: false, r: 0.06, gr: 1.4, engine: true, speed: 1.8, spacing: 0.32, base: 0.05 });
+
+/* =========================================================================
+   9 · Etiquetas
+   ========================================================================= */
+for (const id in INFO) {
+  const inf = INFO[id]; if (!comps[id]) continue;
+  const w = document.createElement('div'); w.className = 'lw';
+  const el = document.createElement('div'); el.className = 'lbl';
+  el.innerHTML = '<i></i><span></span><b></b>';
+  el.querySelector('span').textContent = inf.n.replace(/ \(.*\)$/, '');
+  el.style.setProperty('--c', `var(--c-${inf.sys})`);
+  w.appendChild(el);
+  const o = new CSS2DObject(w); o.position.set(...inf.a); comps[id].group.add(o);
+  comps[id].label = el; comps[id].lblVal = el.querySelector('b');
+}
+
+/* =========================================================================
+   10 · Partículas: estela de hélice y salida de escape
+   ========================================================================= */
+function particles(n, color, size) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  g.setAttribute('aA', new THREE.BufferAttribute(new Float32Array(n), 1));
+  const m = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uColor: { value: new THREE.Color(color) }, uSize: { value: size }, uScale: { value: DPR } },
+    vertexShader: 'attribute float aA; varying float vA; uniform float uSize,uScale; void main(){ vA=aA; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize = uSize*uScale*(220.0/-mv.z); gl_Position=projectionMatrix*mv; }',
+    fragmentShader: 'uniform vec3 uColor; varying float vA; void main(){ float r=length(gl_PointCoord-0.5); if(r>0.5) discard; gl_FragColor=vec4(uColor, smoothstep(0.5,0.0,r)*vA); }' });
+  const p = new THREE.Points(g, m); p.frustumCulled = false; p.renderOrder = 11; scene.add(p);
+  return { p, g, m, n, vel: new Float32Array(n * 3), age: new Float32Array(n).fill(99), life: new Float32Array(n), next: 0 };
+}
+const wake = particles(170, 0xbfe9ff, 0.09);
+const spray = particles(90, 0xbfe9ff, 0.07);
+
+/* =========================================================================
+   11 · Estado y simulación
+   ========================================================================= */
+const S = { rpm: 0, theta: 0, starter: 0, starterAng: 0, keyAng: 0, gear: 0, propAng: 0, block: 1, explode: 0,
+  loads: 0, inv: 0, ac: 0, vs: 12.7, vh: 12.6, vsrClosed: false, vsrAt: -1, vsrAnim: 0, heat: 0, combust: false, ctl: {} };
+let cur = 0, sceneT = 0, isolate = null, selected = null, hovered = null;
+const vib = new THREE.Vector3();
+
+function applyInit(sc) {
+  const i = sc.init || {};
+  if (i.vs != null) S.vs = i.vs; if (i.vh != null) S.vh = i.vh;
+  if (i.vsr != null) { S.vsrClosed = i.vsr; S.vsrAnim = i.vsr ? 1 : 0; }
+  S.vsrAt = -1;
+}
+
+function sim(dt) {
+  const sc = SCENES[cur];
+  const c = S.ctl = sc.ctl(sceneT);
+  const rate = c.rpm > S.rpm ? (S.rpm < 300 ? 700 : 950) : 750;
+  S.rpm = approach(S.rpm, c.rpm || 0, rate, dt);
+  S.starter = damp(S.starter, c.starter || 0, 12, dt);
+  S.keyAng = damp(S.keyAng, [0, 0.6, 1.15][c.key || 0], 14, dt);
+  S.gear = damp(S.gear, c.gear || 0, 3, dt);
+  S.explode = damp(S.explode, c.explode || 0, 3.2, dt);
+  S.block = damp(S.block, c.block ?? 1, 3.5, dt);
+  S.loads = damp(S.loads, c.loads || 0, 5, dt);
+  S.inv = damp(S.inv, c.inv || 0, 5, dt);
+  S.ac = damp(S.ac, c.ac || 0, 5, dt);
+  S.combust = !!c.combust;
+
+  // giro (animación ralentizada: ~0,5 rev/s al arrancar, ~2 rev/s a crucero)
+  let revs = c.spin ? c.spin : (S.rpm > 20 ? 0.25 + S.rpm / 1250 : S.rpm / 80 * 0.25);
+  if (RM) revs *= 0.5;
+  S.theta += revs * TAU * dt;
+  S.starterAng += S.starter * 28 * dt;
+  const running = S.rpm > 500 && S.combust;
+  const charging = running && (c.rpm || 0) > 600;
+  S.running = running; S.charging = charging; S.turning = S.rpm > 150;
+  if (running && S.gear > 0.05) S.propAng += S.gear * revs * TAU * dt / 2.2;
+
+  // electricidad: tensiones y separador con histéresis
+  const vsT = S.starter > 0.5 ? 10.6 : charging ? 14.2 : 12.7;
+  S.vs = approach(S.vs, vsT, S.starter > 0.5 ? 4 : charging ? 0.9 : 0.45, dt);
+  if (S.vsrClosed && S.vs < 12.8) S.vsrClosed = false;
+  else if (!S.vsrClosed && S.vs >= 13.3) { S.vsrClosed = true; S.vsrAt = sceneT; }
+  const vhT = S.vsrClosed && charging ? 13.8 : 12.6 - 0.22 * S.loads - 0.3 * S.ac;
+  S.vh = approach(S.vh, vhT, S.vsrClosed && charging ? 0.32 : 0.05, dt);
+  S.vsrAnim = damp(S.vsrAnim, S.vsrClosed ? 1 : 0, 9, dt);
+  S.heat = damp(S.heat, running ? 1 : 0, 0.7, dt);
+
+  // flujos: física × énfasis de escena × aislamiento
+  const fuelOn = S.turning && (S.combust || S.starter > 0.5) ? 1 : 0;
+  const phys = {
+    fuel_main: fuelOn, fuel_inj0: fuelOn, fuel_inj1: fuelOn, fuel_inj2: fuelOn,
+    dc_start: S.starter, dc_signal: (c.key === 2) ? 1 : 0, dc_alt: charging ? 1 : 0,
+    dc_vsr_a: S.vsrClosed && charging ? 1 : 0, dc_vsr_b: S.vsrClosed && charging ? 1 : 0,
+    dc_house: S.loads > 0.05 ? 1 : 0, load_vhf: S.loads, load_inst: S.loads, load_light: S.loads,
+    dc_inv: S.inv, ac_out: S.ac,
+    sea_main: S.turning ? 1 : 0, fresh_loop: running ? 1 : 0,
+    exh_gas: running ? 1 : 0, exh_wet_g: running ? 1 : 0, exh_wet_w: S.turning ? 1 : 0,
+    mech_shaft: running && S.gear > 0.5 ? 1 : 0,
+  };
+  const vis = c.vis || ALL(1);
+  const pipeDim = c.pipeDim ?? 1;
+  const motion = RM ? 0.4 : 1;
+  for (const f of flowList) {
+    const iso = isolate && isolate !== f.system ? 0.04 : 1;
+    const tgt = (phys[f.id] || 0) * (vis[f.system] ?? 1) * iso;
+    f.int = damp(f.int, tgt, 5, dt);
+    f.glow.visible = f.int > 0.004;
+    f.gm.uniforms.uI.value = f.int;
+    const mul = f.engine ? 0.45 + S.rpm / 2600 : 1;
+    f.off += dt * f.speed * mul * motion;
+    f.gm.uniforms.uOff.value = f.off;
+    if (f.pipe) {
+      const op = pipeDim * (isolate && isolate !== f.system ? 0.22 : 1);
+      const pm = f.pipe.material; pm.opacity = damp(pm.opacity, op, 6, dt); pm.depthWrite = pm.opacity > 0.95;
+      f.pipe.visible = pm.opacity > 0.02;
+    }
+  }
+}
+
+/* =========================================================================
+   12 · Aplicar estado a la escena
+   ========================================================================= */
+const HL = new THREE.Color();
+const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), UPV = new THREE.Vector3(0, 1, 0);
+function animate(dt, time) {
+  // pistones, bielas, cigüeñal, destellos
+  crank.rotation.x = S.theta;
+  for (let i = 0; i < 3; i++) {
+    const A = S.theta + PHI[i];
+    const py = YC + CR * Math.cos(A) + Math.sqrt(LROD * LROD - Math.pow(CR * Math.sin(A), 2));
+    pistons[i].position.y = py + 0.06;
+    tmpA.set(XI[i], YC + CR * Math.cos(A), CR * Math.sin(A)); tmpB.set(XI[i], py, 0);
+    rods[i].position.copy(tmpA).add(tmpB).multiplyScalar(0.5);
+    rods[i].quaternion.setFromUnitVectors(UPV, tmpB.sub(tmpA).normalize());
+    let cA = (S.theta + PSI[i]) % (2 * TAU); if (cA < 0) cA += 2 * TAU;
+    const fire = S.combust && S.rpm > 150 ? Math.pow(Math.max(0, 1 - cA / 1.3), 2) : 0;
+    flashes[i].material.opacity = fire * 0.95 * (isolate && isolate !== 'exh' && isolate !== 'fuel' ? 0.2 : 1);
+    flashes[i].scale.setScalar(0.12 + fire * 0.55);
+    flashes[i].position.y = Math.min(py + 0.17, 1.25);
+  }
+  flywheel.rotation.x = S.theta;
+  pCrank.rotation.x = S.theta; pPump.rotation.x = S.theta * 1.4; pAlt.rotation.x = S.theta * 1.9; altFan.rotation.x = S.theta * 1.9;
+  armature.rotation.x = S.starterAng;
+  shaftSpin.rotation.y = S.propAng; propSpin.rotation.y = S.propAng;
+  gearLever.rotation.z = -0.5 * S.gear + 0.25;
+  keyG.rotation.x = -S.keyAng;
+  needlePivot.rotation.z = (225 - 270 * Math.min(S.rpm, 4000) / 4000) * Math.PI / 180 - Math.PI / 2;
+  vsrBar.rotation.x = (1 - S.vsrAnim) * -0.75;
+
+  // vibración estilizada del motor en marcha
+  const vAmp = S.running ? 0.004 : S.starter > 0.3 ? 0.006 : 0;
+  vib.set(0, Math.sin(time * 61) * vAmp, Math.sin(time * 47) * vAmp * 0.6);
+  const ex = ease(clamp(S.explode, 0, 1));
+  for (const id in comps) {
+    const cpt = comps[id];
+    cpt.group.position.copy(cpt.explode).multiplyScalar(ex);
+    if (ENGINE_IDS.includes(id)) cpt.group.position.add(vib);
+  }
+
+  // bloque translúcido
+  for (const m of fadeMats) {
+    const op = S.block; const tr = op < 0.985;
+    if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; }
+    m.opacity = op; m.depthWrite = op > 0.9;
+  }
+
+  // materiales con potencia (pantallas, luz, LEDs)
+  for (const p of powerMats) p.m.userData.base.copy(p.c).multiplyScalar(clamp(p.get(), 0, 2));
+  mLed.userData.base.copy(SC.dc || HL).multiplyScalar(S.vsrAnim * 2.2);
+  const lampsOn = S.ctl.key >= 1 && S.rpm < 400 ? 1 : 0;
+  mLampOil.userData.base.set('#ffb03a').multiplyScalar(lampsOn * 2.2);
+  mLampChg.userData.base.set('#ff4a3a').multiplyScalar(lampsOn * 2.2);
+  mExh.userData.base.set('#ff5a2a').multiplyScalar(S.heat * 0.55);
+  cabinLight.intensity = S.loads * 2.4;
+
+  // resaltado (hover / selección / sistema aislado)
+  HL.set(TH.hl);
+  for (const id in comps) {
+    const cpt = comps[id];
+    const sysMatch = isolate && INFO[id] && INFO[id].sys === isolate ? 0.35 : 0;
+    const tgt = id === selected ? 0.9 : id === hovered ? 0.6 : sysMatch;
+    cpt.h = damp(cpt.h, tgt, 10, dt);
+    for (const m of cpt.mats) { m.emissive.copy(m.userData.base).lerp(HL, cpt.h * 0.5); m.emissiveIntensity = Math.max(m.userData.ei, 1); }
+  }
+
+  // partículas
+  updateParticles(wake, dt, S.running && S.gear > 0.5 ? S.gear : 0, (i, pos, vel) => {
+    const r = Math.random() * 0.4, a = Math.random() * TAU;
+    pos[0] = SH1.x + 0.15; pos[1] = SH1.y + Math.cos(a) * r; pos[2] = Math.sin(a) * r;
+    vel[0] = 1.6 + Math.random() * 1.2; vel[1] = (Math.random() - 0.5) * 0.25; vel[2] = (Math.random() - 0.5) * 0.35;
+    return 1.3 + Math.random() * 0.6;
+  }, 90, 0);
+  updateParticles(spray, dt, S.running ? 1 : 0, (i, pos, vel) => {
+    pos[0] = 5.66; pos[1] = 1.55; pos[2] = 0.85 + (Math.random() - 0.5) * 0.08;
+    vel[0] = 0.9 + Math.random() * 0.6; vel[1] = 0.2 + Math.random() * 0.3; vel[2] = (Math.random() - 0.5) * 0.4;
+    return 0.8 + Math.random() * 0.4;
+  }, 55, -3.2);
+}
+function updateParticles(P, dt, on, spawn, perSec, gravity) {
+  const pos = P.g.attributes.position.array, al = P.g.attributes.aA.array;
+  if (on > 0.05 && !RM) {
+    P.acc = (P.acc || 0) + dt * perSec * on;
+    while (P.acc >= 1) { P.acc -= 1; const i = P.next; P.next = (P.next + 1) % P.n; P.life[i] = spawn(i, pos.subarray(i * 3, i * 3 + 3), P.vel.subarray(i * 3, i * 3 + 3)); P.age[i] = 0; }
+  }
+  for (let i = 0; i < P.n; i++) {
+    if (P.age[i] > P.life[i]) { al[i] = 0; continue; }
+    P.age[i] += dt; const k = i * 3;
+    P.vel[k + 1] += gravity * dt;
+    pos[k] += P.vel[k] * dt; pos[k + 1] += P.vel[k + 1] * dt; pos[k + 2] += P.vel[k + 2] * dt;
+    if (gravity < 0 && pos[k + 1] < WL) { pos[k + 1] = WL; P.vel[k + 1] = 0; P.vel[k] *= 0.9; }
+    const u = P.age[i] / P.life[i]; al[i] = Math.sin(Math.PI * Math.min(1, u)) * 0.7 * (isolate && isolate !== 'sea' && isolate !== 'mech' ? 0.15 : 1);
+  }
+  P.g.attributes.position.needsUpdate = true; P.g.attributes.aA.needsUpdate = true;
+}
+
+// Desplazamientos de la vista explotada
+const EXP = { tapa: [0, 1.0, 0], culata: [0, 0.55, 0], intercambiador: [0, 1.35, 0.25], colector: [0, 0.2, 0.7], codo: [0.3, 0.4, 0.6], admision: [0, 0.15, -0.75],
+  inyeccion: [0, -0.05, -0.65], alternador: [-0.8, 0.1, 0.25], bomba_mar: [-0.7, -0.15, 0.35], arranque: [0.15, -0.1, 0.85], volante: [0.55, 0, 0], inversora: [1.05, 0, 0] };
+for (const id in EXP) comps[id].explode.set(...EXP[id]);
+
+/* =========================================================================
+   13 · Tema
+   ========================================================================= */
+function applyTheme() {
+  const dark = isDark(); TH = dark ? T3.dark : T3.light;
+  for (const k of SYS_KEYS) SC[k] = new THREE.Color(cssVar('--c-' + k) || '#ffffff');
+  domeMat.uniforms.uTop.value.set(TH.top); domeMat.uniforms.uHor.value.set(TH.hor); domeMat.uniforms.uBot.value.set(TH.bot);
+  scene.fog.color.set(TH.fog);
+  waterMat.uniforms.uColor.value.set(TH.water); waterMat.uniforms.uLine.value.set(TH.waterLine); waterMat.uniforms.uA.value = TH.waterA;
+  hullMat.color.set(TH.hull); hullMat.opacity = TH.hullA;
+  ribMat.color.set(TH.rib); ribMat.opacity = TH.ribA; cutMat.color.set(TH.cut); wlMat.color.set(TH.waterLine);
+  structMats.sole.color.set(TH.sole); structMats.bulk.color.set(TH.bulk);
+  ghostEdge.color.set(TH.cut);
+  bloom.strength = TH.bloom; bloom.threshold = dark ? 1.0 : 1.1;
+  const neutral = new THREE.Color(TH.neutral);
+  for (const f of flowList) {
+    const col = SC[f.system];
+    f.gm.uniforms.uColor.value.copy(col);
+    f.gm.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
+    f.gm.uniforms.uBoost.value = dark ? 2.0 : 0.35;
+    f.gm.needsUpdate = true;
+    if (f.pipe) f.pipe.material.color.copy(f.pipeColor ? new THREE.Color(f.pipeColor) : neutral.clone().lerp(col, f.tint));
+  }
+  wake.m.uniforms.uColor.value.copy(SC.sea).lerp(new THREE.Color('#ffffff'), 0.5);
+  spray.m.uniforms.uColor.value.copy(SC.sea).lerp(new THREE.Color('#ffffff'), 0.5);
+  [wake.m, spray.m].forEach(m => { m.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; m.needsUpdate = true; });
+  renderChips();
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* =========================================================================
+   14 · Cámara: transiciones entre escenas
+   ========================================================================= */
+const camAnim = { k: 1, dur: 1.6, fT: new THREE.Vector3(), tT: new THREE.Vector3(), fS: new THREE.Spherical(), tS: new THREE.Spherical() };
+function presetFor(sc) {
+  const t = V3(...sc.cam.t), p = V3(...sc.cam.p);
+  const asp = camera.aspect || 1.5;
+  const k = asp < 1.25 ? clamp(1 + (1.25 - asp) * 0.95, 1, 1.85) : 1;
+  return { t, p: t.clone().add(p.sub(t).multiplyScalar(k)) };
+}
+function goCamera(sc, instant = false) {
+  const { t, p } = presetFor(sc);
+  camAnim.fT.copy(controls.target); camAnim.tT.copy(t);
+  camAnim.fS.setFromVector3(camera.position.clone().sub(controls.target));
+  camAnim.tS.setFromVector3(p.clone().sub(t));
+  let dTh = camAnim.tS.theta - camAnim.fS.theta; if (dTh > Math.PI) camAnim.tS.theta -= TAU; else if (dTh < -Math.PI) camAnim.tS.theta += TAU;
+  camAnim.k = 0; camAnim.dur = instant || RM ? 0.001 : 1.7;
+  controls.enabled = false;
+}
+const spTmp = new THREE.Spherical();
+function stepCamera(dt) {
+  if (camAnim.k >= 1) return false;
+  camAnim.k = Math.min(1, camAnim.k + dt / camAnim.dur);
+  const e = ease(camAnim.k);
+  controls.target.lerpVectors(camAnim.fT, camAnim.tT, e);
+  spTmp.radius = lerp(camAnim.fS.radius, camAnim.tS.radius, e);
+  spTmp.phi = lerp(camAnim.fS.phi, camAnim.tS.phi, e);
+  spTmp.theta = lerp(camAnim.fS.theta, camAnim.tS.theta, e);
+  camera.position.setFromSpherical(spTmp).add(controls.target);
+  camera.lookAt(controls.target);
+  if (camAnim.k >= 1) controls.enabled = true;
+  return true;
+}
+
+/* =========================================================================
+   15 · Interfaz
+   ========================================================================= */
+const rail = $('#rail'), scenebar = $('#scenebar');
+SCENES.forEach((sc, i) => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'sc';
+  b.innerHTML = `<span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t"></span><span class="s"></span><span class="p"><i></i></span>`;
+  b.querySelector('.t').textContent = sc.name; b.querySelector('.s').textContent = sc.sub;
+  b.addEventListener('click', () => { stopTour(); setScene(i); });
+  rail.appendChild(b); sc.railEl = b;
+  const c = document.createElement('button'); c.type = 'button'; c.setAttribute('role', 'tab');
+  c.innerHTML = `<span>${String(i + 1).padStart(2, '0')}</span>`; c.append(sc.name);
+  c.addEventListener('click', () => { stopTour(); setScene(i); });
+  scenebar.appendChild(c); sc.barEl = c;
+});
+
+function renderChips() {
+  const box = $('#chips'); box.innerHTML = '';
+  box.classList.toggle('isolating', !!isolate);
+  for (const k of SYS_KEYS) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.style.setProperty('--c', `var(--c-${k})`);
+    b.setAttribute('aria-pressed', String(isolate === k)); b.innerHTML = '<i></i>'; b.append(SYS[k].name);
+    b.addEventListener('click', () => { isolate = isolate === k ? null : k; renderChips(); });
+    box.appendChild(b);
+  }
+  if (isolate) { const r = document.createElement('button'); r.type = 'button'; r.className = 'chip reset'; r.textContent = 'Mostrar todos'; r.addEventListener('click', () => { isolate = null; renderChips(); }); box.appendChild(r); }
+  $('#sysdesc').textContent = isolate ? SYS[isolate].desc : '';
+}
+
+let lastStep = -2;
+function renderSceneText() {
+  const sc = SCENES[cur];
+  $('#sceneNum').textContent = `Escena ${cur + 1} de ${SCENES.length}`;
+  $('#sceneTitle').textContent = sc.title; $('#sceneLead').textContent = sc.lead;
+  const ol = $('#steps'); ol.innerHTML = ''; ol.classList.toggle('list', !!sc.list);
+  (sc.steps || []).forEach(st => { const li = document.createElement('li'); const sp = document.createElement('span'); sp.textContent = st.txt; li.appendChild(sp); const bar = document.createElement('span'); bar.className = 'bar'; bar.innerHTML = '<i></i>'; li.appendChild(bar); ol.appendChild(li); });
+  $('#sceneNote').textContent = sc.note || '';
+  $('#capN').textContent = `${String(cur + 1).padStart(2, '0')} / ${String(SCENES.length).padStart(2, '0')} · ${sc.name.toUpperCase()}`;
+  $('#capT').textContent = sc.title; $('#capP').textContent = sc.lead;
+  SCENES.forEach((s, i) => { s.railEl.setAttribute('aria-current', String(i === cur)); s.barEl.setAttribute('aria-current', String(i === cur)); s.barEl.setAttribute('aria-selected', String(i === cur)); });
+  const el = sc.barEl; scenebar.scrollTo({ left: el.offsetLeft - scenebar.clientWidth / 2 + el.clientWidth / 2, behavior: RM ? 'auto' : 'smooth' });
+  lastStep = -2;
+}
+function updateSteps() {
+  const sc = SCENES[cur]; if (sc.list || !sc.steps) return;
+  let idx = -1; sc.steps.forEach((s, i) => { if (s.when(sceneT)) idx = i; });
+  const lis = $('#steps').children;
+  if (idx !== lastStep) {
+    for (let i = 0; i < lis.length; i++) lis[i].className = i < idx ? 'done' : i === idx ? 'active' : '';
+    lastStep = idx;
+    $('#capP').textContent = idx >= 0 ? sc.steps[idx].txt : sc.lead;
+  }
+  if (idx >= 0 && lis[idx]) {
+    const nx = sc.steps[idx + 1]; const t0 = sc.steps[idx].at ?? sceneT; const t1 = nx && nx.at != null ? nx.at : (sc.loop || sc.dur);
+    lis[idx].style.setProperty('--p', clamp((sceneT - t0) / Math.max(0.1, t1 - t0), 0, 1).toFixed(3));
+  }
+}
+
+// HUD
+const hud = $('#hud');
+let hudKeys = '';
+function renderHud() {
+  const sc = SCENES[cur]; const keys = sc.hud || [];
+  if (keys.join() !== hudKeys) {
+    hudKeys = keys.join();
+    const LBL = { rpm: 'Motor', vs: 'Bat. arranque', vh: 'Banco servicio', vsr: 'Separador', gear: 'Inversora', ac: 'Inversor' };
+    hud.innerHTML = keys.map(k => `<div class="row"><span class="k">${LBL[k]}</span><span class="v" data-k="${k}"></span></div>`).join('') + (keys.length ? '<div class="foot">Valores ilustrativos</div>' : '');
+    hud.dataset.empty = String(!keys.length);
+  }
+  for (const el of hud.querySelectorAll('.v')) {
+    const k = el.dataset.k; let html = '';
+    if (k === 'rpm') html = S.rpm < 30 ? 'Parado' : `${fmtInt(Math.round(S.rpm / 10) * 10)} rpm`;
+    else if (k === 'vs') html = fmtV(S.vs) + (S.charging ? ' ▲' : S.starter > 0.5 ? ' ▼' : '');
+    else if (k === 'vh') html = fmtV(S.vh) + (S.vsrClosed && S.charging ? ' ▲' : (S.loads > 0.1 || S.ac > 0.1) ? ' ▼' : '');
+    else if (k === 'vsr') html = `<span class="pill${S.vsrClosed ? ' on' : ''}"><i></i>${S.vsrClosed ? 'Bancos unidos' : 'Bancos aislados'}</span>`;
+    else if (k === 'gear') html = S.gear > 0.5 ? 'Avante' : 'Punto muerto';
+    else if (k === 'ac') html = S.ac > 0.5 ? '230 V · 65 W' : S.inv > 0.5 ? 'En espera' : 'Apagado';
+    if (el._h !== html) { el.innerHTML = html; el._h = html; }
+  }
+  // valores en etiquetas
+  const setVal = (id, v) => { const b = comps[id].lblVal; if (b._v !== v) { b.textContent = v; b._v = v; } };
+  setVal('bat_arranque', fmtV(S.vs)); setVal('bat_servicio', fmtV(S.vh)); setVal('vsr', S.vsrClosed ? 'unidos' : 'aislados');
+}
+
+// Etiquetas visibles por escena
+function updateLabels() {
+  const sc = SCENES[cur]; const narrow = frame.clientWidth < 560;
+  const list = narrow ? sc.labels.slice(0, 4) : sc.labels;
+  for (const id in comps) {
+    const el = comps[id].label; if (!el) continue;
+    el.classList.toggle('on', list.includes(id) && !(isolate && INFO[id].sys !== isolate));
+  }
+}
+function setHover(id) {
+  if (hovered === id) return;
+  if (hovered && comps[hovered].label) comps[hovered].label.classList.remove('hover');
+  hovered = id;
+  if (id && comps[id].label) comps[id].label.classList.add('hover');
+  canvas.style.cursor = id ? 'pointer' : '';
+}
+function select(id) {
+  selected = id;
+  const card = $('#card'), tip = $('#tip');
+  if (!id) { card.hidden = true; tip.classList.remove('show'); return; }
+  const inf = INFO[id];
+  $('#cardTags').innerHTML = `<span class="tag" style="--c:var(--c-${inf.sys})"><i></i>${SYS[inf.sys].name}</span><span class="tag">${TAGS[inf.tag]}</span>`;
+  $('#cardT').textContent = inf.n; $('#cardD').textContent = inf.d;
+  $('#cardS').textContent = inf.s || ''; $('#cardS').hidden = !inf.s;
+  $('#cardN').textContent = inf.note || ''; $('#cardN').hidden = !inf.note;
+  card.hidden = false; card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+  $('#tipT').textContent = inf.n; $('#tipP').textContent = inf.d; tip.classList.add('show');
+  if (matchMedia('(min-width: 768px)').matches) $('#insp').scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' });
+}
+$('#cardX').addEventListener('click', () => select(null));
+$('#tipX').addEventListener('click', () => select(null));
+
+// Selección con puntero
+const ray = new THREE.Raycaster(); const ndc = new THREE.Vector2();
+function pick(cx, cy) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hits = ray.intersectObjects(pickables, false);
+  for (const h of hits) { if (h.object.userData.fade && S.block < 0.6) continue; const id = h.object.userData.pickComp; if (id && INFO[id]) return id; }
+  return null;
+}
+let pmPending = null, downAt = null;
+canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') pmPending = [e.clientX, e.clientY]; });
+canvas.addEventListener('pointerleave', () => { pmPending = null; setHover(null); });
+canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
+canvas.addEventListener('pointerup', e => {
+  if (!downAt) return; const d = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]); downAt = null;
+  if (d < 6) select(pick(e.clientX, e.clientY));
+});
+
+// Escenas y tour
+const tour = { on: false };
+function setScene(i, fromTour = false) {
+  cur = (i + SCENES.length) % SCENES.length; sceneT = 0;
+  const sc = SCENES[cur];
+  applyInit(sc); goCamera(sc);
+  controls.autoRotateSpeed = sc.spin ?? 0.3; controls.autoRotate = !RM;
+  renderSceneText(); updateLabels(); hudKeys = '';
+  if (!fromTour) $('#capP').textContent = sc.lead;
+  try { history.replaceState(null, '', '#' + sc.key); } catch (e) {}
+}
+function startTour() {
+  tour.on = true; select(null); setScene(0, true);
+  $('#btnTour').setAttribute('aria-pressed', 'true');
+  $('#icoTour').innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+  $('#lblTour').innerHTML = 'Pausar <span class="lg">tour</span>';
+}
+function stopTour() {
+  if (!tour.on) return; tour.on = false;
+  $('#btnTour').setAttribute('aria-pressed', 'false');
+  $('#icoTour').innerHTML = '<polygon points="7 4 20 12 7 20 7 4"/>';
+  $('#lblTour').innerHTML = 'Tour <span class="lg">guiado</span>';
+  $('#tourbar').style.setProperty('--p', 0);
+  SCENES.forEach(s => s.railEl.querySelector('.p').style.setProperty('--p', 0));
+}
+const tourScale = () => (document.body.classList.contains('clip') ? 0.68 : 1);
+$('#btnTour').addEventListener('click', () => (tour.on ? stopTour() : startTour()));
+$('#prevBtn').addEventListener('click', () => { stopTour(); setScene(cur - 1); });
+$('#nextBtn').addEventListener('click', () => { stopTour(); setScene(cur + 1); });
+$('#replayBtn').addEventListener('click', () => { setScene(cur, tour.on); });
+
+// Modo clip
+let clipAR = 0.5625, idleTimer = null;
+function layoutFrame() {
+  const st = $('#stage');
+  if (!document.body.classList.contains('clip')) { frame.style.width = ''; frame.style.height = ''; return; }
+  const W = st.clientWidth - 24, H = st.clientHeight - 24;
+  let w = W, h = W / clipAR; if (h > H) { h = H; w = H * clipAR; }
+  frame.style.width = Math.floor(w) + 'px'; frame.style.height = Math.floor(h) + 'px';
+}
+function clipIdle() { const cb = $('#clipbar'); cb.classList.remove('idle'); clearTimeout(idleTimer); idleTimer = setTimeout(() => cb.classList.add('idle'), 2200); }
+function enterClip() {
+  document.body.classList.add('clip'); select(null); layoutFrame(); clipIdle();
+  setTimeout(startTour, 450);
+}
+function exitClip() { document.body.classList.remove('clip'); layoutFrame(); stopTour(); }
+$('#btnClip').addEventListener('click', enterClip);
+$('#clipExit').addEventListener('click', exitClip);
+$('#clipRestart').addEventListener('click', () => { startTour(); clipIdle(); });
+document.querySelectorAll('#clipbar .seg button').forEach(b => b.addEventListener('click', () => {
+  clipAR = parseFloat(b.dataset.ar);
+  document.querySelectorAll('#clipbar .seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  layoutFrame(); clipIdle();
+}));
+window.addEventListener('pointermove', () => { if (document.body.classList.contains('clip')) clipIdle(); });
+
+// Teclado
+window.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input,textarea')) return;
+  if (e.key === 'Escape') { if (document.body.classList.contains('clip')) exitClip(); else if (selected) select(null); else if (isolate) { isolate = null; renderChips(); } }
+  else if (e.key === 'ArrowRight') { stopTour(); setScene(cur + 1); }
+  else if (e.key === 'ArrowLeft') { stopTour(); setScene(cur - 1); }
+  else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); tour.on ? stopTour() : startTour(); }
+});
+
+/* =========================================================================
+   16 · Tamaño, calidad adaptativa y bucle
+   ========================================================================= */
+function resize() {
+  const w = Math.max(1, frame.clientWidth), h = Math.max(1, frame.clientHeight);
+  renderer.setSize(w, h, false);
+  composer.setPixelRatio(DPR); composer.setSize(w, h);
+  labelRenderer.setSize(w, h);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  updateLabels();
+}
+new ResizeObserver(() => { layoutFrame(); resize(); }).observe($('#stage'));
+new ResizeObserver(resize).observe(frame);
+
+const Q = { tier: 0, acc: 0, n: 0, warm: 0 };
+function adapt(dt) {
+  Q.warm += dt; if (Q.warm < 2.5 || Q.tier >= 2) return;
+  Q.acc += dt; Q.n++;
+  if (Q.n >= 90) {
+    const fps = Q.n / Q.acc; Q.acc = 0; Q.n = 0;
+    if (fps < 38) {
+      Q.tier++;
+      if (Q.tier === 1) { bloom.enabled = false; DPR = Math.min(DPR, 1); renderer.setPixelRatio(DPR); wake.m.uniforms.uScale.value = spray.m.uniforms.uScale.value = DPR; resize(); }
+      if (Q.tier === 2) { renderer.shadowMap.enabled = false; scene.traverse(o => { if (o.material && o.material.needsUpdate !== undefined && o.isMesh) o.material.needsUpdate = true; }); }
+    }
+  }
+}
+
+const clock = new THREE.Clock();
+let elapsed = 0;
+function frameLoop() {
+  const dt = Math.min(clock.getDelta(), 0.05); elapsed += dt;
+  sceneT += dt; uTime.value = elapsed; waterMat.uniforms.uTime.value = elapsed;
+  const sc = SCENES[cur];
+  if (sc.loop && sceneT >= sc.loop) { sceneT = 0; applyInit(sc); lastStep = -2; }
+  if (tour.on) {
+    const d = sc.dur * tourScale();
+    let before = 0; for (let i = 0; i < cur; i++) before += SCENES[i].dur * tourScale();
+    $('#tourbar').style.setProperty('--p', clamp((before + sceneT) / (TOUR_TOTAL * tourScale()), 0, 1).toFixed(4));
+    sc.railEl.querySelector('.p').style.setProperty('--p', clamp(sceneT / d, 0, 1).toFixed(3));
+    if (sceneT >= d) { if (cur < SCENES.length - 1) setScene(cur + 1, true); else stopTour(); }
+  }
+  sim(dt); animate(dt, elapsed);
+  const moving = stepCamera(dt);
+  if (!moving) {
+    if (!controls.autoRotate && !RM && performance.now() - userTouchedAt > 7000 && !tour.on) controls.autoRotate = true;
+    controls.update(dt);
+  }
+  if (pmPending) { setHover(pick(pmPending[0], pmPending[1])); pmPending = null; }
+  updateSteps(); renderHud();
+  composer.render(dt);
+  labelRenderer.render(scene, camera);
+  adapt(dt);
+}
+
+/* =========================================================================
+   17 · Arranque
+   ========================================================================= */
+async function boot() {
+  try { await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
+  applyTheme();
+  const fromHash = SCENES.findIndex(s => '#' + s.key === location.hash);
+  resize();
+  cur = fromHash >= 0 ? fromHash : 0;
+  applyInit(SCENES[cur]);
+  const p = presetFor(SCENES[cur]); controls.target.copy(p.t); camera.position.copy(p.p);
+  setScene(cur);
+  camAnim.k = 1; controls.enabled = true;
+  renderChips();
+  renderer.setAnimationLoop(frameLoop);
+  window.__salaReady = true;
+  $('#loading').style.opacity = 0;
+}
+boot();
+</script>
+
+</body></html>
