@@ -1,0 +1,27 @@
+{
+  "repository": "MotorMarino",
+  "sourceCommit": "7be633c02609cb07cb00fb082f443ff02dafa26c",
+  "url": "https://guirigall.github.io/MotorMarino/",
+  "screenshots": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1050
+      },
+      "title": "Sala de Màquines 3YM20",
+      "pageErrors": []
+    },
+    {
+      "name": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "title": "Sala de Màquines 3YM20",
+      "pageErrors": []
+    }
+  ],
+  "publishedStatus": null,
+  "publishedError": "Cannot read properties of undefined (reading 'get')"
+}
