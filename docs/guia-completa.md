@@ -67,7 +67,7 @@ node tests-pwa.mjs
 
 Publica tot el conjunt, preferentment amb un desplegament atòmic. L’eina sincronitza la configuració de dependències incrustada a l’HTML i recalcula la versió. Si canvies els imports o la versió de Three.js, actualitza també `dependency-roots.json`. La PWA mostra «Actualització disponible» i només recarrega la finestra quan l’usuari prem «Actualitza i reinicia». Si els imports continuen sent els mateixos, la nova memòria cau reutilitza els recursos 3D verificats de la versió anterior, també per permetre actualitzar sense connexió.
 
-Les proves cobreixen el manifest, les icones, la integritat de les escenes, el graf 3D complet, els errors, els orígens permesos, les actualitzacions i els tres idiomes. Utilitzen API de navegador simulades. **No s’ha pogut provar una descàrrega real del CDN ni una instal·lació en Android des d’aquest entorn.** Després de publicar-la, comprova la instal·lació, la preparació completa, el mode avió, el canvi d’idioma i les actualitzacions al mòbil.
+Les proves cobreixen el manifest, les icones, la integritat de les escenes, el graf 3D complet, els errors, els orígens permesos, les actualitzacions i els tres idiomes. Utilitzen API de navegador simulades. Les captures del README s’han generat en Chromium amb càrrega real del CDN. La instal·lació física en Android no s’ha verificat. Després de publicar-la, comprova la instal·lació, la preparació completa, el mode avió, el canvi d’idioma i les actualitzacions al mòbil.
 
 <a id="espanol"></a>
 ## Español
@@ -130,12 +130,12 @@ node tests-pwa.mjs
 
 Publica todo el conjunto, preferiblemente con un despliegue atómico. La herramienta sincroniza la configuración de dependencias incrustada en el HTML y recalcula la versión. Si cambias los imports o la versión de Three.js, actualiza también `dependency-roots.json`. La PWA muestra «Actualización disponible» y solo recarga la ventana cuando el usuario pulsa «Actualiza y reinicia». Si los imports siguen siendo los mismos, la nueva caché reutiliza los recursos 3D verificados de la versión anterior, también para permitir actualizar sin conexión.
 
-Las pruebas cubren el manifiesto, los iconos, la integridad de las escenas, el grafo 3D completo, los errores, los orígenes permitidos, las actualizaciones y los tres idiomas. Utilizan API de navegador simuladas. **No se ha podido probar una descarga real del CDN ni una instalación en Android desde este entorno.** Después de publicarla, comprueba la instalación, la preparación completa, el modo avión, el cambio de idioma y las actualizaciones en el móvil.
+Las pruebas cubren el manifiesto, los iconos, la integridad de las escenas, el grafo 3D completo, los errores, los orígenes permitidos, las actualizaciones y los tres idiomas. Utilizan API de navegador simuladas. Las capturas del README se han generado en Chromium con carga real del CDN. No se ha verificado la instalación en un dispositivo Android. Después de publicarla, comprueba la instalación, la preparación completa, el modo avión, el cambio de idioma y las actualizaciones en el móvil.
 
 <a id="english"></a>
 ## English
 
-Installable version of the sailboat’s 3D engine room, with Catalan, Spanish and English. It preserves the eight scenes, guided tour, component details, indicators and clip mode from the original translated file. The PWA is ready in this folder, but **has not been published yet**.
+Installable version of the sailboat’s 3D engine room, with Catalan, Spanish and English. It preserves the eight scenes, guided tour, component details, indicators and clip mode from the original translated file. The PWA is ready in this folder, but **is available through the README link**.
 
 ### Publishing and installing
 
