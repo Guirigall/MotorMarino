@@ -1,6 +1,6 @@
 {
   "repository": "MotorMarino",
-  "sourceCommit": "7be633c02609cb07cb00fb082f443ff02dafa26c",
+  "sourceCommit": "756629dd942cb9f8133563b405c3c506792eb672",
   "url": "https://guirigall.github.io/MotorMarino/",
   "screenshots": [
     {
@@ -22,6 +22,5 @@
       "pageErrors": []
     }
   ],
-  "publishedStatus": null,
-  "publishedError": "Cannot read properties of undefined (reading 'get')"
+  "publishedStatus": 200
 }
